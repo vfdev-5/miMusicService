@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.vfdev.mimusicservicelib">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name">
+        <service
+            android:name="com.vfdev.mimusicservicelib.MusicService"
+            android:enabled="true" >
+        </service>
+
+    </application>
+
+</manifest>

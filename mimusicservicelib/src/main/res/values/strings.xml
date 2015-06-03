@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">miMusicServiceLib</string>
+    <string name="no_tracks">No tracks</string>
+
+    <string name="progress_msg">Please wait while retrieving a playlist</string>
+    <string name="progress_msg2">New track is loading …</string>
+    <string name="notrack_err">Sorry, no tracks found on your tags</string>
+    <string name="connx_err">Ops, there is a problem with internet connection</string>
+    <string name="app_err">Ops, there is a problem with the application</string>
+    <string name="no_audio_focus_err">Ops, this app can not play music while another app uses audio service</string>
+    <string name="nexttrack_err">Ops, there is a problem to play next track</string>
+    <string name="prevtrack_err">Ops, there is a problem to play previous track</string>
+    <string name="play_failed">Somehow, app can not play tracks</string>
+
+
+</resources>

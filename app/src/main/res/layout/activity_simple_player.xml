@@ -1,0 +1,81 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.example.vfdev.myapplication.SimplePlayer">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Exit"
+        android:id="@+id/exit"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="onExitButtonClicked"/>
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play"
+        android:onClick="onPlayButtonClicked"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textOn="Pause"
+        android:textOff="Play" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next"
+        android:id="@+id/next"
+        android:layout_alignTop="@+id/play"
+        android:layout_toRightOf="@+id/play"
+        android:layout_toEndOf="@+id/play"
+        android:onClick="onNextButtonClicked"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Previous"
+        android:id="@+id/prev"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/play"
+        android:layout_toStartOf="@+id/play"
+        android:onClick="onPrevButtonClicked"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Track title"
+        android:id="@+id/title"
+        android:layout_above="@+id/play"
+        android:layout_alignLeft="@+id/prev"
+        android:layout_alignStart="@+id/prev" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Tags"
+        android:id="@+id/tags"
+        android:layout_below="@+id/prev"
+        android:layout_alignLeft="@+id/prev"
+        android:layout_alignStart="@+id/prev" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Duration : "
+        android:id="@+id/duration"
+        android:layout_marginBottom="62dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/tags"
+        android:layout_alignStart="@+id/tags" />
+
+
+</RelativeLayout>
