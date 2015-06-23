@@ -1,1 +1,1 @@
-include ':app', ':mimusicservicelib'
+include ':app', ':mimusicservicelib', ':musicserviceapp'

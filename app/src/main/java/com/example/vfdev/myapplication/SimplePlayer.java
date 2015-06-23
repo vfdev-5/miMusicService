@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -20,6 +22,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 /*
@@ -103,7 +106,7 @@ import timber.log.Timber;
 
  */
 public class SimplePlayer extends Activity implements
-        MusicPlayer.OnStateChangeListener,
+//        MusicPlayer.OnStateChangeListener,
         TrackInfoProvider.OnDownloadTrackInfoListener
 {
 
@@ -113,6 +116,8 @@ public class SimplePlayer extends Activity implements
     TextView titleTV;
     TextView tagsTV;
     TextView durationTV;
+    EditText queryET;
+    SoundCloundProvider mProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,27 +128,36 @@ public class SimplePlayer extends Activity implements
             Timber.plant(new Timber.DebugTree());
         }
 
+        EventBus.getDefault().register(this);
+
         titleTV = (TextView) findViewById(R.id.title);
         tagsTV = (TextView) findViewById(R.id.tags);
         durationTV = (TextView) findViewById(R.id.duration);
+        queryET = (EditText) findViewById(R.id.query);
 
-//        mMSHelper = new MusicServiceHelper(this, new SoundCloundProvider(), this.getClass());
-//        mMSHelper.startMusicService();
         mPlayer = new MusicPlayer(this);
-        mPlayer.setStateChangeListener(this);
+//        mPlayer.setStateChangeListener(this);
 
-        setupTracks();
+        mProvider = new SoundCloundProvider();
+        mProvider.setOnDownloadTrackInfoListener(this);
+
+        setupTracks("Trance Armin Van Buuren");
 
     }
 
 
-    private void setupTracks() {
+    private void setupTracks(String query) {
         Timber.v("setupTracks");
-        SoundCloundProvider provider = new SoundCloundProvider();
-        provider.setQuery("Sia Chandelier");
-        provider.setOnDownloadTrackInfoListener(this);
-        provider.retrieveInBackground(5);
+        mProvider.setQuery(query);
+        mProvider.retrieveInBackground(5);
     }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -206,6 +220,11 @@ public class SimplePlayer extends Activity implements
         mPlayer.playPrevTrack();
     }
 
+    public void onSendQuery(View view) {
+        setupTracks(queryET.getText().toString());
+    }
+
+
     // --------- TrackInfoProvider.OnDownloadTrackInfoListener
 
     @Override
@@ -234,37 +253,62 @@ public class SimplePlayer extends Activity implements
         }
     }
 
+    // -------- MusicPlayer.StateEvent
+
+    public void onEvent(MusicPlayer.StateEvent event) {
+        if (event.state == MusicPlayer.State.Paused) {
+//            Toast.makeText(this, "DEBUG : Paused", Toast.LENGTH_SHORT).show();
+
+        } else if (event.state == MusicPlayer.State.Playing) {
+            Toast.makeText(this, "Playing ...", Toast.LENGTH_SHORT).show();
+            ToggleButton button = (ToggleButton) findViewById(R.id.play);
+            button.setChecked(true);
+        } else if (event.state == MusicPlayer.State.Preparing) {
+            Toast.makeText(this, "Preparing ...", Toast.LENGTH_SHORT).show();
+            TrackInfo trackInfo = event.trackInfo;
+            if (trackInfo.duration > 0) {
+                durationTV.setText(MusicPlayer.getDuration(trackInfo.duration));
+            }
+            titleTV.setText(event.trackInfo.title);
+            tagsTV.setText(event.trackInfo.tags);
+        } else if (event.state == MusicPlayer.State.Stopped) {
+//            Toast.makeText(this, "DEBUG : On Stopped", Toast.LENGTH_SHORT).show();
+            ToggleButton button = (ToggleButton) findViewById(R.id.play);
+            button.setChecked(false);
+        }
+    }
+
 
     // --------- MusicPlayer.OnStateChangeListener
-
-    @Override
-    public void onPrepared(TrackInfo trackInfo) {
-        Toast.makeText(this, "On prepared", Toast.LENGTH_SHORT).show();
-        durationTV.setText(MusicPlayer.getDuration(trackInfo.duration));
-    }
-
-    @Override
-    public void onStarted() {
-        Toast.makeText(this, "On Started", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onPaused() {
-        Toast.makeText(this, "On Paused", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onIsPreparing(TrackInfo trackInfo) {
-        Toast.makeText(this, "On IsPreparing", Toast.LENGTH_SHORT).show();
-        titleTV.setText(trackInfo.title);
-        tagsTV.setText(trackInfo.tags);
-
-    }
-
-    @Override
-    public void onStopped() {
-        Toast.makeText(this, "On Stopped", Toast.LENGTH_SHORT).show();
-    }
+//    @Override
+//    public void onPrepared(TrackInfo trackInfo) {
+//        Toast.makeText(this, "On prepared", Toast.LENGTH_SHORT).show();
+//        durationTV.setText(MusicPlayer.getDuration(trackInfo.duration));
+//    }
+//
+//    @Override
+//    public void onStarted() {
+//        Toast.makeText(this, "On Started", Toast.LENGTH_SHORT).show();
+//    }
+//
+//    @Override
+//    public void onPaused() {
+//        Toast.makeText(this, "On Paused", Toast.LENGTH_SHORT).show();
+//    }
+//
+//    @Override
+//    public void onIsPreparing(TrackInfo trackInfo) {
+//        Toast.makeText(this, "On IsPreparing", Toast.LENGTH_SHORT).show();
+//        titleTV.setText(trackInfo.title);
+//        tagsTV.setText(trackInfo.tags);
+//    }
+//
+//    @Override
+//    public void onStopped() {
+//        Toast.makeText(this, "On Stopped", Toast.LENGTH_SHORT).show();
+//        ToggleButton button = (ToggleButton) findViewById(R.id.play);
+//        button.setChecked(false);
+//    }
 
 
 

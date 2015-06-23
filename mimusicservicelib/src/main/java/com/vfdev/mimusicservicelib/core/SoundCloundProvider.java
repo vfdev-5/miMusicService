@@ -53,15 +53,22 @@ public class SoundCloundProvider extends TrackInfoProvider {
      * @return array of track infos
      */
     public Result retrieve(int count) {
+        return retrieve(count, true);
+    }
+
+    public Result retrieve(int count, boolean useOffset) {
 
         Timber.v("SoundCloundProvider : request tracks on the query : " + mQuery);
-        String requestUrl = setupRequest(count, false);
+        String requestUrl = setupRequest(count, useOffset);
         Pair<Integer,String> result = sendRequest(requestUrl);
         int code = result.first;
         if (code == OK) {
             Result anotherResult = parseResponse(result.second);
             if (anotherResult.code == OK) {
                 return new Result(code, anotherResult.tracks);
+            } else if (anotherResult.code == NOTRACKS_ERR && useOffset) {
+                // Handle if no result with non-zero offset
+                return retrieve(count, false);
             }
         }
         // handle errors:
@@ -77,6 +84,7 @@ public class SoundCloundProvider extends TrackInfoProvider {
         if (useOffset) {
             requestUrl += "&offset=" + String.valueOf(new Random().nextInt(1000));
         }
+        requestUrl += "&order=created_at";
         requestUrl += "&client_id=" + CLIENT_ID;
         return requestUrl;
     }

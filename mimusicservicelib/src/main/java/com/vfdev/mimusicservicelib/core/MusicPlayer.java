@@ -3,15 +3,13 @@ package com.vfdev.mimusicservicelib.core;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Bundle;
 import android.os.PowerManager;
-
-import com.example.vfdev.mimusicservicelib.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 /**
@@ -33,15 +31,15 @@ public class MusicPlayer implements
     private boolean hasAudiofocus=false;
 
     // Listeners
-    private OnStateChangeListener mListener; // player state change listener
-    private OnErrorListener mErrorListener;
-    private OnTrackListUpdateListener mTracksUpdateListener;
+//    private OnStateChangeListener mListener; // player state change listener
+//    private OnErrorListener mErrorListener;
+//    private OnTrackListUpdateListener mTracksUpdateListener;
 
     public static final int ERROR_DATASOURCE = 1;
     public static final int ERROR_NO_AUDIOFOCUS = 2;
 
     // Player states
-    private enum State {
+    public enum State {
         Stopped,    // media player is stopped and not prepared to play
         Preparing,  // media player is preparing...
         Playing,    // playback active (media player ready!)
@@ -86,6 +84,14 @@ public class MusicPlayer implements
         releaseAudioFocus();
     }
 
+    public TrackInfo getPlayingTrack() {
+        if (mTracksHistory.size() > 0){
+            // get the last track
+            return mTracksHistory.get(mTracksHistory.size()-1);
+        }
+        return null;
+    }
+
     public ArrayList<TrackInfo> getTracksHistory() {
         return mTracksHistory;
     }
@@ -94,10 +100,14 @@ public class MusicPlayer implements
         return mTracks.size();
     }
 
+    public void setTracks(ArrayList<TrackInfo> tracks) {
+        if (tracks != null) {
+            mTracks = tracks;
+        }
+    }
     public void addTracks(ArrayList<TrackInfo> tracks) {
         mTracks.addAll(tracks);
     }
-
     public void addTrack(TrackInfo track) {
         mTracks.add(track);
     }
@@ -107,23 +117,29 @@ public class MusicPlayer implements
     }
 
     public void pause(){
-        mMediaPlayer.pause();
-        mState = State.Paused;
-        if (mListener != null) {
-            mListener.onPaused();
+        Timber.v("Pause");
+
+        if (mState == State.Playing) {
+            mMediaPlayer.pause();
+            mState = State.Paused;
+            EventBus.getDefault().post(new StateEvent(State.Paused, null));
+//            if (mListener != null) {
+//                mListener.onPaused();
+//            }
         }
     }
 
 
     public boolean play() {
-        Timber.v("play");
+        Timber.v("Play");
 
         if (mState == State.Paused) {
             mMediaPlayer.start();
             mState = State.Playing;
-            if (mListener != null) {
-                mListener.onStarted();
-            }
+            EventBus.getDefault().post(new StateEvent(State.Playing, null));
+//            if (mListener != null) {
+//                mListener.onStarted();
+//            }
             return true;
         } else if (mState == State.Stopped) {
             // Only when Player is stopped, request audio focus
@@ -160,7 +176,7 @@ public class MusicPlayer implements
 
         if (mTracks.isEmpty()) {
             Timber.v("Track list is empty");
-//            mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
+            toStoppedState();
             return false;
         }
 
@@ -175,9 +191,10 @@ public class MusicPlayer implements
             mTracksHistory.remove(0);
         }
 
-        if (mTracksUpdateListener != null) {
-            mTracksUpdateListener.onUpdate(mTracksHistory);
-        }
+//        if (mTracksUpdateListener != null) {
+//            mTracksUpdateListener.onUpdate(mTracksHistory);
+//        }
+        EventBus.getDefault().post(new UpdateEvent(mTracksHistory));
 
         return prepareAndPlay(track);
     }
@@ -194,9 +211,10 @@ public class MusicPlayer implements
             mTracksHistory.remove(mTracksHistory.size() - 1);
             TrackInfo track = mTracksHistory.get(mTracksHistory.size() - 1);
 
-            if (mTracksUpdateListener != null) {
-                mTracksUpdateListener.onUpdate(mTracksHistory);
-            }
+            EventBus.getDefault().post(new UpdateEvent(mTracksHistory));
+//            if (mTracksUpdateListener != null) {
+//                mTracksUpdateListener.onUpdate(mTracksHistory);
+//            }
 
             return prepareAndPlay(track);
         }
@@ -204,17 +222,17 @@ public class MusicPlayer implements
     }
 
 
-    public void setStateChangeListener(OnStateChangeListener listener) {
-        mListener = listener;
-    }
+//    public void setStateChangeListener(OnStateChangeListener listener) {
+//        mListener = listener;
+//    }
 
-    public void setErrorListener(OnErrorListener listener) {
-        mErrorListener = listener;
-    }
+//    public void setErrorListener(OnErrorListener listener) {
+//        mErrorListener = listener;
+//    }
 
-    public void setTrackListUpdateListener(OnTrackListUpdateListener listener) {
-        mTracksUpdateListener = listener;
-    }
+//    public void setTrackListUpdateListener(OnTrackListUpdateListener listener) {
+//        mTracksUpdateListener = listener;
+//    }
 
 
     static public String getDuration(int durationInMillis) {
@@ -237,10 +255,20 @@ public class MusicPlayer implements
         Timber.d("---------------- ");
     }
 
+    private void toStoppedState() {
+        EventBus.getDefault().post(new StateEvent(State.Stopped, null));
+//        if (mListener != null) {
+//            mListener.onStopped();
+//        }
+        mState = State.Stopped;
+        mMediaPlayer.reset();
+    }
+
     private void toPreparingState(TrackInfo trackInfo) {
-        if (mListener != null) {
-            mListener.onIsPreparing(trackInfo);
-        }
+        EventBus.getDefault().post(new StateEvent(State.Preparing, trackInfo));
+//        if (mListener != null) {
+//            mListener.onIsPreparing(trackInfo);
+//        }
         mState = State.Preparing;
         mMediaPlayer.reset();
     }
@@ -251,19 +279,16 @@ public class MusicPlayer implements
 
         try {
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            //mMediaPlayer.setDataSource(mTrackInfoProvider.getCompleteStreamUrl(track.streamUrl));
             mMediaPlayer.setDataSource(track.streamUrl);
             mMediaPlayer.prepareAsync();
         } catch (IOException e) {
             Timber.e(e, "prepareAndPlay : request error : " + e.getMessage());
-            if (mErrorListener != null) {
-//                mErrorListener.onShowErrorMessage(getString(R.string.app_err));
-                mErrorListener.onShowErrorMessage(ERROR_DATASOURCE, e.getMessage());
-            }
-            if (mListener != null) {
-                mListener.onStopped();
-            }
-            mState = State.Stopped;
+            EventBus.getDefault().post(new ErrorEvent(ERROR_DATASOURCE, e.getMessage()));
+//            if (mErrorListener != null) {
+//                mErrorListener.onShowErrorMessage(ERROR_DATASOURCE, e.getMessage());
+//            }
+
+            toStoppedState();
             return false;
         }
 
@@ -290,10 +315,10 @@ public class MusicPlayer implements
 
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             Timber.v("Audio focus request is not granted");
-            if (mErrorListener != null) {
-//                mErrorListener.onShowErrorMessage(getString(R.string.no_audio_focus_err));
-                mErrorListener.onShowErrorMessage(ERROR_NO_AUDIOFOCUS, "Audio focus request is not granted");
-            }
+            EventBus.getDefault().post(new ErrorEvent(ERROR_NO_AUDIOFOCUS, "Audio focus request is not granted"));
+//            if (mErrorListener != null) {
+//                mErrorListener.onShowErrorMessage(ERROR_NO_AUDIOFOCUS, "Audio focus request is not granted");
+//            }
             hasAudiofocus = false;
         } else {
             hasAudiofocus = true;
@@ -311,7 +336,6 @@ public class MusicPlayer implements
 
     public void onCompletion(MediaPlayer player) {
         Timber.v("onCompletion MediaPlayer");
-
         // The media player finished playing the current Track, so we go ahead and start the next.
         playNextTrack();
     }
@@ -319,33 +343,29 @@ public class MusicPlayer implements
     public void onPrepared(MediaPlayer player) {
         Timber.v("onPrepared MediaPlayer");
 
+        TrackInfo currentTrack = mTracksHistory.get(mTracksHistory.size()-1);
+        currentTrack.duration = player.getDuration();
+        EventBus.getDefault().post(new StateEvent(State.Preparing, currentTrack));
+//        if (mListener != null) {
+//            mListener.onPrepared(currentTrack);
+//        }
+
+
         // The media player is done preparing. That means we can start playing!
         mState = State.Playing;
-        TrackInfo currentTrack = mTracksHistory.get(mTracksHistory.size()-1);
-//        showNotification(currentTrack.title);
-        currentTrack.duration = player.getDuration();
-
-        if (mListener != null) {
-            mListener.onPrepared(currentTrack);
-        }
-
         // This handles the case when :
         // audio focus is lost while service was in State.Preparing
         // Player should not start
         if (hasAudiofocus) {
             Timber.v("Has audio focus. Start playing");
-            if (mListener != null) {
-                mListener.onStarted();
-            }
+            EventBus.getDefault().post(new StateEvent(State.Playing, null));
+//            if (mListener != null) {
+//                mListener.onStarted();
+//            }
             player.start();
         } else {
             Timber.v("Has no audio focus. Do not start");
         }
-
-//        // get tracks if there rests the last one
-//        if (mTracks.size() == 1) {
-//            mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
-//        }
     }
 
     public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -365,23 +385,22 @@ public class MusicPlayer implements
 
             hasAudiofocus=false;
             // Pause playback
-//            if (mMediaPlayer.isPlaying()) {
-//                pause();
-//                mState = State.Playing;
-//            }
+            if (mMediaPlayer.isPlaying()) {
+                pause();
+                mState = State.Playing;
+            }
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             Timber.v("AUDIOFOCUS_GAIN");
 
             // Resume playback
             hasAudiofocus=true;
-//            if (!mMediaPlayer.isPlaying() &&
-//                    mState == State.Playing) {
-//                mState = State.Paused;
-//                play();
-//            }
+            if (!mMediaPlayer.isPlaying() &&
+                    mState == State.Playing) {
+                mState = State.Paused;
+                play();
+            }
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             Timber.v("AUDIOFOCUS_LOSS");
-
             // Audio focus loss is permanent
             releaseAudioFocus();
         }
@@ -390,23 +409,47 @@ public class MusicPlayer implements
 
     // ---------- Music Player Listener Interface
 
-    public interface OnStateChangeListener {
-//        public void onPrepared(Bundle result);
-        public void onPrepared(TrackInfo trackInfo);
-        public void onStarted();
-        public void onPaused();
-        public void onIsPreparing(TrackInfo trackInfo);
-        public void onStopped();
-
+    public class StateEvent {
+        public final TrackInfo trackInfo;
+        public final State state;
+        public StateEvent(State state, TrackInfo trackInfo) {
+            this.state = state;
+            this.trackInfo = trackInfo;
+        }
     }
 
-    public interface OnErrorListener {
-        public void onShowErrorMessage(int code, String msg);
+    public class ErrorEvent {
+        public final int code;
+        public final String message;
+        public ErrorEvent(int code, String message) {
+            this.code = code;
+            this.message = message;
+        }
     }
 
-    public interface OnTrackListUpdateListener {
-        public void onUpdate(ArrayList<TrackInfo> tracks);
+    public class UpdateEvent {
+        public final ArrayList<TrackInfo> playlist;
+        public UpdateEvent(ArrayList<TrackInfo> playlist) {
+            this.playlist = playlist;
+        }
     }
+
+
+//    public interface OnStateChangeListener {
+//        public void onPrepared(TrackInfo trackInfo);
+//        public void onStarted();
+//        public void onPaused();
+//        public void onIsPreparing(TrackInfo trackInfo);
+//        public void onStopped();
+//    }
+//
+//    public interface OnErrorListener {
+//        public void onShowErrorMessage(int code, String msg);
+//    }
+//
+//    public interface OnTrackListUpdateListener {
+//        public void onUpdate(ArrayList<TrackInfo> tracks);
+//    }
 
 
 }
