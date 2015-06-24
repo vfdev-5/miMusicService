@@ -100,5 +100,12 @@
         android:layout_toEndOf="@+id/query"
         android:onClick="onSendQuery"/>
 
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/artwork"
+        android:alpha="0.5"
+        android:src="@color/dim_foreground_material_light" />
+
 
 </RelativeLayout>

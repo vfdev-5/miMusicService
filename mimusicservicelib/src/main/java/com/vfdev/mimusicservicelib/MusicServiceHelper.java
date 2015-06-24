@@ -11,6 +11,8 @@ import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
+import java.util.ArrayList;
+
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
@@ -92,6 +94,32 @@ public class MusicServiceHelper implements
         }
     }
 
+    public ArrayList<TrackInfo> getPlaylist() {
+        if (mBound) {
+            return mService.getPlayer().getTracks();
+        }
+        return null;
+    }
+
+    public ArrayList<TrackInfo> getTracksHistory() {
+        if (mBound) {
+            return mService.getPlayer().getTracksHistory();
+        }
+        return null;
+    }
+
+    public void clearPlaylist() {
+        if (mBound) {
+            mService.getPlayer().clearTracks();
+        }
+    }
+
+    public void clearTracksHistory() {
+        if (mBound) {
+            mService.getPlayer().clearTracksHistory();
+        }
+    }
+
     public TrackInfo getPlayingTrackInfo() {
         if (mBound) {
             return mService.getPlayer().getPlayingTrack();
@@ -127,23 +155,15 @@ public class MusicServiceHelper implements
         mService = binder.getService();
         mBound = true;
 
-        // setup track info provider:
-        mService.setTrackInfoProvider(mProvider);
-
-
-        // setup music player state listener
-//        MusicPlayer.OnStateChangeListener listener = (MusicPlayer.OnStateChangeListener) mContext;
-//        if ( listener != null ) {
-//            mService.getPlayer().setStateChangeListener(listener);
-//        }
+        // setup once track info provider:
+        if (mService.getTrackInfoProvider() == null) {
+            mService.setTrackInfoProvider(mProvider);
+        }
 
         if (mListener != null) {
             mListener.onReady();
         }
 
-//        mService.setErrorListener(this);
-//        mMainFragment.setService(mService);
-//        mPlaylistFragment.setService(mService);
     }
 
     @Override

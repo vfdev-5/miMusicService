@@ -124,10 +124,6 @@ public class SimplePlayer extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_player);
 
-        if (BuildConfig.DEBUG) {
-            Timber.plant(new Timber.DebugTree());
-        }
-
         EventBus.getDefault().register(this);
 
         titleTV = (TextView) findViewById(R.id.title);
@@ -136,7 +132,6 @@ public class SimplePlayer extends Activity implements
         queryET = (EditText) findViewById(R.id.query);
 
         mPlayer = new MusicPlayer(this);
-//        mPlayer.setStateChangeListener(this);
 
         mProvider = new SoundCloundProvider();
         mProvider.setOnDownloadTrackInfoListener(this);

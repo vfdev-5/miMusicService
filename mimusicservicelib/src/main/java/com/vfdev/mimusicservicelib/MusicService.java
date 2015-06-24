@@ -36,21 +36,24 @@ public class MusicService extends Service implements
     private Bitmap mServiceIcon;
     private Class<?> mActivityClass;
 
-
     // Wifi manager
     private WifiManager.WifiLock mWifiLock;
 
     // Bound service
     private IBinder mBinder;
-//    private OnStateChangeListener mListener;
-//    private OnErrorListener mErrorListener;
-//    private OnTrackListUpdateListener mTracksUpdateListener;
 
     private MusicPlayer mPlayer;
 
     // Connection
     private TrackInfoProvider mTrackInfoProvider;
     private static final int TRACKS_COUNT=5;
+
+
+    // Error codes
+    public final static int APP_ERR = TrackInfoProvider.APP_ERR;
+    public final static int CONNECTION_ERR = TrackInfoProvider.CONNECTION_ERR;
+    public final static int NOTRACKS_ERR = TrackInfoProvider.NOTRACKS_ERR;
+    public final static int QUERY_ERR = TrackInfoProvider.QUERY_ERR;
 
     // ImageLoader onLoadingComplete Callback instance
 //    private _SimpleImageLoadingListener mLoadingListener;
@@ -118,8 +121,6 @@ public class MusicService extends Service implements
     @Override
     public boolean onUnbind(Intent intent) {
         Timber.v("onUnbind");
-//        mListener = null;
-//        mErrorListener = null;
         return true;
     }
 
@@ -162,13 +163,17 @@ public class MusicService extends Service implements
                 Timber.v(t.toString());
             }
             mPlayer.addTracks(tracks);
-        } else if (code == TrackInfoProvider.APP_ERR) {
-//            Toast.makeText(this, "Application error", Toast.LENGTH_SHORT).show();
 
+            EventBus.getDefault().post(new QueryResponseEvent(tracks));
+
+        } else if (code == TrackInfoProvider.APP_ERR) {
+            EventBus.getDefault().post(new ErrorEvent(MusicService.APP_ERR, "Application error"));
         } else if (code == TrackInfoProvider.CONNECTION_ERR) {
-//            Toast.makeText(this, "Connection error", Toast.LENGTH_SHORT).show();
+            EventBus.getDefault().post(new ErrorEvent(MusicService.CONNECTION_ERR, "Connection error"));
         } else if (code == TrackInfoProvider.NOTRACKS_ERR) {
-//            Toast.makeText(this, "No tracks found on the query", Toast.LENGTH_SHORT).show();
+            EventBus.getDefault().post(new ErrorEvent(MusicService.NOTRACKS_ERR, "No tracks found"));
+        } else if (code == TrackInfoProvider.QUERY_ERR) {
+            EventBus.getDefault().post(new ErrorEvent(MusicService.QUERY_ERR, "Query error"));
         }
     }
 
@@ -204,12 +209,16 @@ public class MusicService extends Service implements
         return mPlayer;
     }
 
+    public TrackInfoProvider getTrackInfoProvider() {
+        return mTrackInfoProvider;
+    }
+
     public void setTrackInfoProvider(TrackInfoProvider provider) {
         mTrackInfoProvider = provider;
         mTrackInfoProvider.setOnDownloadTrackInfoListener(this);
         // NO NEED
         // Get some tracks
-        mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
+        //  mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
     }
 
     public void setupTracks(String query) {
@@ -226,9 +235,6 @@ public class MusicService extends Service implements
         mPlayer.release();
         // we can also release the Wifi lock, if we're holding it
         if (mWifiLock.isHeld()) mWifiLock.release();
-
-        // destroy imageloader
-//        ImageLoader.getInstance().destroy();
 
     }
 
@@ -268,5 +274,22 @@ public class MusicService extends Service implements
         }
     }
 
+    // --------- MusicService.QueryResponseEvent
+    public class QueryResponseEvent {
+        public final ArrayList<TrackInfo> tracks;
+        public QueryResponseEvent(ArrayList<TrackInfo> tracks) {
+            this.tracks = tracks;
+        }
+    }
+
+    // --------- MusicService.ErrorEvent
+    public class ErrorEvent {
+        public final int code;
+        public final String message;
+        public ErrorEvent(int code, String message) {
+            this.code = code;
+            this.message = message;
+        }
+    }
 
 }

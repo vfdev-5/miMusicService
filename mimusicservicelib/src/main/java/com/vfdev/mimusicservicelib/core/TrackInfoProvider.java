@@ -2,9 +2,12 @@ package com.vfdev.mimusicservicelib.core;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+//import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * Created by vfomin on 5/16/15.
@@ -26,6 +29,7 @@ public abstract class TrackInfoProvider {
     public final static int APP_ERR=1;
     public final static int CONNECTION_ERR=2;
     public final static int NOTRACKS_ERR=3;
+    public final static int QUERY_ERR=4;
 
     protected OnDownloadTrackInfoListener mTrackInfoListener;
     protected String mQuery = "Trance";
@@ -55,8 +59,14 @@ public abstract class TrackInfoProvider {
     public abstract Result retrieve(int count);
 
     public synchronized void setQuery(String query) {
-        String q = StringEscapeUtils.escapeHtml4(query);
-        mQuery = q.replaceAll("\\s","%20");
+        try {
+            mQuery = URLEncoder.encode(query, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            if (mTrackInfoListener != null) {
+                mTrackInfoListener.onDownloadTrackInfo(new Result(QUERY_ERR, null));
+            }
+            mQuery = "";
+        }
     }
 
 
@@ -79,7 +89,11 @@ public abstract class TrackInfoProvider {
         }
         @Override
         protected Result doInBackground(Integer... params) {
-            return TrackInfoProvider.this.retrieve(params[0]);
+            if (!mQuery.isEmpty()) {
+                return TrackInfoProvider.this.retrieve(params[0]);
+            } else {
+                return new Result(QUERY_ERR, null);
+            }
         }
 
         @Override

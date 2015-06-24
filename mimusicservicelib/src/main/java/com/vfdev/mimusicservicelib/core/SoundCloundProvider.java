@@ -1,8 +1,5 @@
 package com.vfdev.mimusicservicelib.core;
 
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Pair;
 
 import com.squareup.okhttp.OkHttpClient;
@@ -57,10 +54,9 @@ public class SoundCloundProvider extends TrackInfoProvider {
     }
 
     public Result retrieve(int count, boolean useOffset) {
-
-        Timber.v("SoundCloundProvider : request tracks on the query : " + mQuery);
+        Timber.v("SoundCloundProvider : request tracks on the query : " + mQuery + ", useOffset=" + useOffset);
         String requestUrl = setupRequest(count, useOffset);
-        Pair<Integer,String> result = sendRequest(requestUrl);
+        Pair<Integer, String> result = sendRequest(requestUrl);
         int code = result.first;
         if (code == OK) {
             Result anotherResult = parseResponse(result.second);
@@ -70,6 +66,7 @@ public class SoundCloundProvider extends TrackInfoProvider {
                 // Handle if no result with non-zero offset
                 return retrieve(count, false);
             }
+            return new Result(anotherResult.code, null);
         }
         // handle errors:
         return new Result(code,  null);

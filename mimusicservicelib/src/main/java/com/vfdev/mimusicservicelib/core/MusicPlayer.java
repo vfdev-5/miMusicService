@@ -14,6 +14,15 @@ import timber.log.Timber;
 
 /**
  * Created by vfomin on 5/31/15.
+ *
+ *
+ * MusicPlayer implements a simple music player using Android MediaPlayer
+ * It has two main attributes :
+ * 1) Tracks (list of tracks to play)
+ * 2) TrackHistory (list of played and playing tracks)
+ * A track is realized using the class TrackInfo.
+ *
+ *
  */
 public class MusicPlayer implements
         MediaPlayer.OnCompletionListener,
@@ -30,13 +39,9 @@ public class MusicPlayer implements
     private AudioManager mAudioManager;
     private boolean hasAudiofocus=false;
 
-    // Listeners
-//    private OnStateChangeListener mListener; // player state change listener
-//    private OnErrorListener mErrorListener;
-//    private OnTrackListUpdateListener mTracksUpdateListener;
-
     public static final int ERROR_DATASOURCE = 1;
-    public static final int ERROR_NO_AUDIOFOCUS = 2;
+    public static final int ERROR_APP = 2;
+    public static final int ERROR_NO_AUDIOFOCUS = 3;
 
     // Player states
     public enum State {
@@ -85,15 +90,27 @@ public class MusicPlayer implements
     }
 
     public TrackInfo getPlayingTrack() {
-        if (mTracksHistory.size() > 0){
+        if (!mTracksHistory.isEmpty()){
             // get the last track
             return mTracksHistory.get(mTracksHistory.size()-1);
         }
         return null;
     }
 
+    public void clearTracksHistory() {
+        mTracksHistory.clear();
+    }
+
+    public void clearTracks() {
+        mTracks.clear();
+    }
+
     public ArrayList<TrackInfo> getTracksHistory() {
         return mTracksHistory;
+    }
+
+    public ArrayList<TrackInfo> getTracks() {
+        return mTracks;
     }
 
     public int getTracksCount() {
@@ -123,9 +140,6 @@ public class MusicPlayer implements
             mMediaPlayer.pause();
             mState = State.Paused;
             EventBus.getDefault().post(new StateEvent(State.Paused, null));
-//            if (mListener != null) {
-//                mListener.onPaused();
-//            }
         }
     }
 
@@ -137,9 +151,6 @@ public class MusicPlayer implements
             mMediaPlayer.start();
             mState = State.Playing;
             EventBus.getDefault().post(new StateEvent(State.Playing, null));
-//            if (mListener != null) {
-//                mListener.onStarted();
-//            }
             return true;
         } else if (mState == State.Stopped) {
             // Only when Player is stopped, request audio focus
@@ -191,9 +202,6 @@ public class MusicPlayer implements
             mTracksHistory.remove(0);
         }
 
-//        if (mTracksUpdateListener != null) {
-//            mTracksUpdateListener.onUpdate(mTracksHistory);
-//        }
         EventBus.getDefault().post(new UpdateEvent(mTracksHistory));
 
         return prepareAndPlay(track);
@@ -212,28 +220,11 @@ public class MusicPlayer implements
             TrackInfo track = mTracksHistory.get(mTracksHistory.size() - 1);
 
             EventBus.getDefault().post(new UpdateEvent(mTracksHistory));
-//            if (mTracksUpdateListener != null) {
-//                mTracksUpdateListener.onUpdate(mTracksHistory);
-//            }
 
             return prepareAndPlay(track);
         }
         return false;
     }
-
-
-//    public void setStateChangeListener(OnStateChangeListener listener) {
-//        mListener = listener;
-//    }
-
-//    public void setErrorListener(OnErrorListener listener) {
-//        mErrorListener = listener;
-//    }
-
-//    public void setTrackListUpdateListener(OnTrackListUpdateListener listener) {
-//        mTracksUpdateListener = listener;
-//    }
-
 
     static public String getDuration(int durationInMillis) {
         int hours = ((int) Math.floor(durationInMillis * 0.001 / 3600.0)) % 60;
@@ -257,18 +248,12 @@ public class MusicPlayer implements
 
     private void toStoppedState() {
         EventBus.getDefault().post(new StateEvent(State.Stopped, null));
-//        if (mListener != null) {
-//            mListener.onStopped();
-//        }
         mState = State.Stopped;
         mMediaPlayer.reset();
     }
 
     private void toPreparingState(TrackInfo trackInfo) {
         EventBus.getDefault().post(new StateEvent(State.Preparing, trackInfo));
-//        if (mListener != null) {
-//            mListener.onIsPreparing(trackInfo);
-//        }
         mState = State.Preparing;
         mMediaPlayer.reset();
     }
@@ -284,9 +269,6 @@ public class MusicPlayer implements
         } catch (IOException e) {
             Timber.e(e, "prepareAndPlay : request error : " + e.getMessage());
             EventBus.getDefault().post(new ErrorEvent(ERROR_DATASOURCE, e.getMessage()));
-//            if (mErrorListener != null) {
-//                mErrorListener.onShowErrorMessage(ERROR_DATASOURCE, e.getMessage());
-//            }
 
             toStoppedState();
             return false;
@@ -316,9 +298,6 @@ public class MusicPlayer implements
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             Timber.v("Audio focus request is not granted");
             EventBus.getDefault().post(new ErrorEvent(ERROR_NO_AUDIOFOCUS, "Audio focus request is not granted"));
-//            if (mErrorListener != null) {
-//                mErrorListener.onShowErrorMessage(ERROR_NO_AUDIOFOCUS, "Audio focus request is not granted");
-//            }
             hasAudiofocus = false;
         } else {
             hasAudiofocus = true;
@@ -343,12 +322,15 @@ public class MusicPlayer implements
     public void onPrepared(MediaPlayer player) {
         Timber.v("onPrepared MediaPlayer");
 
+        // check mTracksHistory.size
+        if (mTracksHistory.isEmpty()){
+            toStoppedState();
+            EventBus.getDefault().post(new ErrorEvent(ERROR_APP, "Track history is empty"));
+        }
+
         TrackInfo currentTrack = mTracksHistory.get(mTracksHistory.size()-1);
         currentTrack.duration = player.getDuration();
         EventBus.getDefault().post(new StateEvent(State.Preparing, currentTrack));
-//        if (mListener != null) {
-//            mListener.onPrepared(currentTrack);
-//        }
 
 
         // The media player is done preparing. That means we can start playing!
@@ -359,9 +341,6 @@ public class MusicPlayer implements
         if (hasAudiofocus) {
             Timber.v("Has audio focus. Start playing");
             EventBus.getDefault().post(new StateEvent(State.Playing, null));
-//            if (mListener != null) {
-//                mListener.onStarted();
-//            }
             player.start();
         } else {
             Timber.v("Has no audio focus. Do not start");
@@ -433,23 +412,4 @@ public class MusicPlayer implements
             this.playlist = playlist;
         }
     }
-
-
-//    public interface OnStateChangeListener {
-//        public void onPrepared(TrackInfo trackInfo);
-//        public void onStarted();
-//        public void onPaused();
-//        public void onIsPreparing(TrackInfo trackInfo);
-//        public void onStopped();
-//    }
-//
-//    public interface OnErrorListener {
-//        public void onShowErrorMessage(int code, String msg);
-//    }
-//
-//    public interface OnTrackListUpdateListener {
-//        public void onUpdate(ArrayList<TrackInfo> tracks);
-//    }
-
-
 }
