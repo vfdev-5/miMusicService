@@ -55,10 +55,6 @@ public class MusicService extends Service implements
     public final static int NOTRACKS_ERR = TrackInfoProvider.NOTRACKS_ERR;
     public final static int QUERY_ERR = TrackInfoProvider.QUERY_ERR;
 
-    // ImageLoader onLoadingComplete Callback instance
-//    private _SimpleImageLoadingListener mLoadingListener;
-//    private Bitmap mCurrentWaveform;
-
     // -------- Service methods
 
     @Override
@@ -76,14 +72,6 @@ public class MusicService extends Service implements
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "MY_WIFI_LOCK");
         mWifiLock.acquire();
 
-        // Image loader
-        // Create global configuration and initialize ImageLoader with this config
-//        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
-//                .build();
-//        ImageLoader.getInstance().init(config);
-//        mLoadingListener = new _SimpleImageLoadingListener();
-
-        showNotification(getString(R.string.no_tracks));
     }
 
     /**
@@ -101,6 +89,9 @@ public class MusicService extends Service implements
                 Timber.e("Failed to cast to Class<?>");
             }
         }
+
+        showNotification(getString(R.string.no_tracks));
+
         return START_NOT_STICKY; // Don't automatically restart this Service if it is killed
     }
 
@@ -132,19 +123,6 @@ public class MusicService extends Service implements
         }
     }
 
-    // ----------- ImageLoader onLoadingComplete listener
-/*
-    private class _SimpleImageLoadingListener extends SimpleImageLoadingListener {
-        @Override
-        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-            // Do whatever you want with Bitmap
-            mCurrentWaveform = loadedImage;
-            if (mListener != null) {
-                mListener.onWaveformLoaded(loadedImage);
-            }
-        }
-    }
-*/
     // ------------ OnDownloadTrackInfoListener
 
     @Override
@@ -176,32 +154,6 @@ public class MusicService extends Service implements
             EventBus.getDefault().post(new ErrorEvent(MusicService.QUERY_ERR, "Query error"));
         }
     }
-
-//        Timber.v("onDownloadTrackInfo");
-//        if (result.getBoolean("Result")) {
-////            mTracks.addAll(tracks);
-////            Timber.v("Add tracks -> tracklist size = " + mTracks.size());
-//        } else {
-
-//            if (mErrorListener != null) {
-//                int errorType = result.getInt("ErrorType");
-//                if (errorType == TrackInfoProvider.APP_ERR) {
-//                    mErrorListener.onShowErrorMessage(getString(R.string.app_err));
-//                } else if (errorType == TrackInfoProvider.CONNECTION_ERR) {
-//                    mErrorListener.onShowErrorMessage(getString(R.string.connx_err));
-//                } else if (errorType == TrackInfoProvider.NOTRACKS_ERR) {
-//                    mErrorListener.onShowErrorMessage(getString(R.string.notrack_err));
-//                }
-//            }
-
-////            DO NOT STOP PLAYING
-////            mState = State.Stopped;
-////            if (mListener != null) {
-////                mListener.onStopped();
-////            }
-////            mMediaPlayer.reset();
-//        }
-
 
     // ------------ Other methods
 
@@ -252,6 +204,7 @@ public class MusicService extends Service implements
                 .setOngoing(true);
 
         if (mActivityClass != null) {
+            Timber.v("Show notification : mActivityClass is not null");
             // Create a notification area notification so the user
             // can get back to a mActivityClass
             final Intent notificationIntent = new Intent(getApplicationContext(), mActivityClass);

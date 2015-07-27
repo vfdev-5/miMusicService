@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">MusicService Example</string>
-
     <string name="action_settings">Settings</string>
 </resources>

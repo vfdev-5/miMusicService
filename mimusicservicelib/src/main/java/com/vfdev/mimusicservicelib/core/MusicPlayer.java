@@ -38,6 +38,7 @@ public class MusicPlayer implements
     // AudioManager
     private AudioManager mAudioManager;
     private boolean hasAudiofocus=false;
+    private boolean lostAudiofocusWhilePlaying=false;
 
     public static final int ERROR_DATASOURCE = 1;
     public static final int ERROR_APP = 2;
@@ -138,8 +139,7 @@ public class MusicPlayer implements
 
         if (mState == State.Playing) {
             mMediaPlayer.pause();
-            mState = State.Paused;
-            EventBus.getDefault().post(new StateEvent(State.Paused, null));
+            changeState(State.Paused, null);
         }
     }
 
@@ -149,8 +149,7 @@ public class MusicPlayer implements
 
         if (mState == State.Paused) {
             mMediaPlayer.start();
-            mState = State.Playing;
-            EventBus.getDefault().post(new StateEvent(State.Playing, null));
+            changeState(State.Playing, null);
             return true;
         } else if (mState == State.Stopped) {
             // Only when Player is stopped, request audio focus
@@ -247,15 +246,18 @@ public class MusicPlayer implements
     }
 
     private void toStoppedState() {
-        EventBus.getDefault().post(new StateEvent(State.Stopped, null));
-        mState = State.Stopped;
+        changeState(State.Stopped, null);
         mMediaPlayer.reset();
     }
 
     private void toPreparingState(TrackInfo trackInfo) {
-        EventBus.getDefault().post(new StateEvent(State.Preparing, trackInfo));
-        mState = State.Preparing;
+        changeState(State.Preparing, trackInfo);
         mMediaPlayer.reset();
+    }
+
+    private void changeState(State state, TrackInfo trackInfo) {
+        mState = state;
+        EventBus.getDefault().post(new StateEvent(mState, trackInfo));
     }
 
     private boolean prepareAndPlay(TrackInfo track) {
@@ -328,19 +330,17 @@ public class MusicPlayer implements
             EventBus.getDefault().post(new ErrorEvent(ERROR_APP, "Track history is empty"));
         }
 
-        TrackInfo currentTrack = mTracksHistory.get(mTracksHistory.size()-1);
-        currentTrack.duration = player.getDuration();
-        EventBus.getDefault().post(new StateEvent(State.Preparing, currentTrack));
-
+//        TrackInfo currentTrack = mTracksHistory.get(mTracksHistory.size()-1);
+//        currentTrack.duration = player.getDuration();
+//        changeState(State.Preparing, currentTrack);
 
         // The media player is done preparing. That means we can start playing!
-        mState = State.Playing;
         // This handles the case when :
-        // audio focus is lost while service was in State.Preparing
+        // audio focus is lost while player was in State.Preparing
         // Player should not start
         if (hasAudiofocus) {
             Timber.v("Has audio focus. Start playing");
-            EventBus.getDefault().post(new StateEvent(State.Playing, null));
+            changeState(State.Playing, null);
             player.start();
         } else {
             Timber.v("Has no audio focus. Do not start");
@@ -366,7 +366,7 @@ public class MusicPlayer implements
             // Pause playback
             if (mMediaPlayer.isPlaying()) {
                 pause();
-                mState = State.Playing;
+                lostAudiofocusWhilePlaying=true;
             }
         } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             Timber.v("AUDIOFOCUS_GAIN");
@@ -374,9 +374,9 @@ public class MusicPlayer implements
             // Resume playback
             hasAudiofocus=true;
             if (!mMediaPlayer.isPlaying() &&
-                    mState == State.Playing) {
-                mState = State.Paused;
+                    lostAudiofocusWhilePlaying) {
                 play();
+                lostAudiofocusWhilePlaying=false;
             }
         } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             Timber.v("AUDIOFOCUS_LOSS");

@@ -34,17 +34,6 @@ public class SoundCloundProvider extends TrackInfoProvider {
     private final static int TRACKS_LIMIT=7;
 
     /**
-     * Abstract method to retrieve track info asynchronously
-     * @param count is the number of tracks to retrieve
-     */
-//    public synchronized void retrieveInBackground(int count) {
-//        if (mDownloader == null) {
-//            mDownloader = new DownloadTrackInfoAsyncTask(mTrackInfoListener);
-//            mDownloader.execute(count);
-//        }
-//    }
-
-    /**
      * Abstract method to retrieve track info
      * @param count is the number of tracks to retrieve
      * @return array of track infos

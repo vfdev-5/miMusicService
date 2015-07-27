@@ -36,6 +36,7 @@ TODO :
     24/06/2015
     5) OK = MusicServiceHelper : get playlist, trackshistory
     6) OK = MusicServiceHelper : clear playlist, clear trackshistory
+    07/07/2015
     7)
 */
 
@@ -226,7 +227,7 @@ public class MainActivity extends Activity implements
         }
     }
 
-    // --------- MusicService.ErrorEvent
+    // --------- MusicService.QueryResponseEvent
     public void onEvent(MusicService.QueryResponseEvent event) {
         Toast.makeText(this, "Found " + event.tracks.size() + " tracks", Toast.LENGTH_SHORT).show();
     }

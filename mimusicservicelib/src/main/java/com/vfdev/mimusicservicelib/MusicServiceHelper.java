@@ -70,6 +70,10 @@ public class MusicServiceHelper implements
         unbind();
     }
 
+    public MusicPlayer getPlayer() {
+        return mBound ? mService.getPlayer() : null;
+    }
+
     public boolean play() {
         return mBound && mService.getPlayer().play();
     }
@@ -130,7 +134,6 @@ public class MusicServiceHelper implements
     public boolean isPlaying() {
         return (mBound) && mService.getPlayer().isPlaying();
     }
-
 
     // ----------- Protected methods
 
