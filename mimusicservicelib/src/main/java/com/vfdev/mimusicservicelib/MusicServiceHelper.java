@@ -49,15 +49,20 @@ public class MusicServiceHelper implements
         mProvider = provider;
     }
 
-    public void startMusicService(OnReadyListener listener) {
+    public void startMusicService() {
         Timber.v("startMusicService");
         // start service and bind
         Intent i = new Intent(mContext, MusicService.class);
         i.putExtra("ActivityClass", mActivityClass);
 
-        mListener = listener;
         mContext.startService(i);
         mContext.bindService(new Intent(mContext, MusicService.class), this, Context.BIND_AUTO_CREATE);
+    }
+
+    @Deprecated
+    public void startMusicService(OnReadyListener listener) {
+        mListener = listener;
+        startMusicService();
     }
 
     public void stopMusicService() {
@@ -135,6 +140,12 @@ public class MusicServiceHelper implements
         return (mBound) && mService.getPlayer().isPlaying();
     }
 
+    public void setContinuousPlay(boolean value) {
+        if (mBound) {
+            mService.setContinuousPlay(value);
+        }
+    }
+
     // ----------- Protected methods
 
     protected void unbind() {
@@ -145,13 +156,12 @@ public class MusicServiceHelper implements
         }
     }
 
-
     // ----------- Service connection
 
     // Defines callbacks for service binding, passed to bindService()
     @Override
     public void onServiceConnected(ComponentName className, IBinder service) {
-        Timber.v("Main activity is connected to MusicService");
+        Timber.v("MusicServiceHelper is connected to MusicService");
 
         // We've bound to MusicService, cast the IBinder and get LocalService instance
         MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
@@ -161,12 +171,14 @@ public class MusicServiceHelper implements
         // setup once track info provider:
         if (mService.getTrackInfoProvider() == null) {
             mService.setTrackInfoProvider(mProvider);
+            mService.setContinuousPlay(true);
         }
 
         if (mListener != null) {
             mListener.onReady();
         }
 
+        EventBus.getDefault().post(new ReadyEvent());
     }
 
     @Override
@@ -175,8 +187,13 @@ public class MusicServiceHelper implements
     }
 
 
-    // ---------------- MusicServiceHendler.OnReadyListener
+    // ---------------- MusicServiceHendler.ReadyEvent
+    public class ReadyEvent {
+        public ReadyEvent() {}
+    }
 
+    // ---------------- MusicServiceHendler.OnReadyListener
+    @Deprecated
     public interface OnReadyListener {
         public void onReady();
     }

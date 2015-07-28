@@ -23,6 +23,7 @@
         - getPlayingTrackInfo
         - clearPlaylist
         - setupTracks
+        - startMusicService
         - stopMusicService
         etc
 ``` java

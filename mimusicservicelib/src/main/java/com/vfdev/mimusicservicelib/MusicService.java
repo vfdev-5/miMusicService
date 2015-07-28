@@ -43,6 +43,7 @@ public class MusicService extends Service implements
     private IBinder mBinder;
 
     private MusicPlayer mPlayer;
+    boolean mContinuousPlay = false;
 
     // Connection
     private TrackInfoProvider mTrackInfoProvider;
@@ -161,6 +162,10 @@ public class MusicService extends Service implements
         return mPlayer;
     }
 
+    public void setContinuousPlay(boolean value) {
+        mContinuousPlay = value;
+    }
+
     public TrackInfoProvider getTrackInfoProvider() {
         return mTrackInfoProvider;
     }
@@ -224,6 +229,12 @@ public class MusicService extends Service implements
     public void onEvent(MusicPlayer.StateEvent event) {
         if (event.state == MusicPlayer.State.Preparing) {
             showNotification(event.trackInfo.title);
+
+            if (mTrackInfoProvider != null &&
+                    mContinuousPlay &&
+                    mPlayer.getTracks().size() < 2) {
+                mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
+            }
         }
     }
 
