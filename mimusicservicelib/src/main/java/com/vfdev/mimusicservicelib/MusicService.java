@@ -91,7 +91,8 @@ public class MusicService extends Service implements
             }
         }
 
-        showNotification(getString(R.string.no_tracks));
+        showNotification(mPlayer.getPlayingTrack() != null ?
+                mPlayer.getPlayingTrack().title : getString(R.string.no_tracks));
 
         return START_NOT_STICKY; // Don't automatically restart this Service if it is killed
     }
