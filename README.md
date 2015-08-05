@@ -26,14 +26,21 @@
         - startMusicService
         - stopMusicService
         etc
+    5) Subscribe to various events : 
+        - MusicServiceHelper.ReadyEvent when service is ready 
+        - MusicPlayer.StateEvent when player updates its internal event.state {Playing, Paused, Preparing, Stopped}
+        - MusicPlayer.ErrorEvent when there is an error in the player, event.code {ERROR_DATASOURCE, ERROR_APP, ERROR_NO_AUDIOFOCUS}
+        - MusicService.ErrorEvent when there is an error in the service, event.code {APP_ERR, CONNECTION_ERR, NOTRACKS_ERR, QUERY_ERR}
+        - MusicService.QueryResponseEvent when service receives tracks from a provider (e.g. SoundCloud) and sends a list of tracks, event.tracks
+
 ``` java
 public class MainActivity extends Activity implements MusicServiceHelper.OnReadyListener
 {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // ...
-        mMSHelper = new MusicServiceHelper(this, new SoundCloundProvider(), MainActivity.class);
-        mMSHelper.startMusicService(this);
+        mMSHelper = new MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
+        mMSHelper.startMusicService();
         
     }
     // ...
