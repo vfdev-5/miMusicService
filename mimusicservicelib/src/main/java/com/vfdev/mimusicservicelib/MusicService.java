@@ -209,7 +209,6 @@ public class MusicService extends Service implements
                 .setOngoing(true);
 
         if (mActivityClass != null) {
-            Timber.v("Show notification : mActivityClass is not null");
             // Create a notification area notification so the user
             // can get back to a mActivityClass
             final Intent notificationIntent = new Intent(getApplicationContext(), mActivityClass);

@@ -33,7 +33,7 @@ public class MusicServiceHelper implements
     private TrackInfoProvider mProvider;
     private MusicService mService = null;
     private boolean mBound = false;
-    private OnReadyListener mListener = null;
+//    private OnReadyListener mListener = null;
 
     // ------ Public methods
     /**
@@ -43,14 +43,30 @@ public class MusicServiceHelper implements
      * @param activityClass notification activity class that should be called
      *
      */
-    public MusicServiceHelper(Context context, TrackInfoProvider provider, Class<?> activityClass) {
+    static private MusicServiceHelper _instance;
+
+    static public MusicServiceHelper getInstance() {
+        if (_instance == null) {
+            _instance = new MusicServiceHelper();
+        }
+        return _instance;
+    }
+
+    private MusicServiceHelper() {
+
+    }
+
+    public MusicServiceHelper init(Context context, TrackInfoProvider provider, Class<?> activityClass) {
         mContext = context;
         mActivityClass = activityClass;
         mProvider = provider;
+        return this;
     }
 
     public void startMusicService() {
         Timber.v("startMusicService");
+        if (!isInit()) return;
+
         // start service and bind
         Intent i = new Intent(mContext, MusicService.class);
         i.putExtra("ActivityClass", mActivityClass);
@@ -59,20 +75,17 @@ public class MusicServiceHelper implements
         mContext.bindService(new Intent(mContext, MusicService.class), this, Context.BIND_AUTO_CREATE);
     }
 
-    @Deprecated
-    public void startMusicService(OnReadyListener listener) {
-        mListener = listener;
-        startMusicService();
-    }
-
     public void stopMusicService() {
         Timber.v("stopMusicService");
+        if (!isInit()) return;
         unbind();
         mContext.stopService(new Intent(mContext, MusicService.class));
     }
 
     public void release() {
+        if (!isInit()) return;
         unbind();
+
     }
 
     public MusicPlayer getPlayer() {
@@ -156,6 +169,16 @@ public class MusicServiceHelper implements
         }
     }
 
+    protected boolean isInit() {
+        boolean res = (mContext !=null) &&
+                (mProvider != null) &&
+                (mActivityClass != null);
+        if (!res) {
+            Timber.e("MusicServiceHelper is not initialized");
+        }
+        return res;
+    }
+
     // ----------- Service connection
 
     // Defines callbacks for service binding, passed to bindService()
@@ -174,28 +197,21 @@ public class MusicServiceHelper implements
             mService.setContinuousPlay(true);
         }
 
-        if (mListener != null) {
-            mListener.onReady();
-        }
-
         EventBus.getDefault().post(new ReadyEvent());
     }
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
-        Timber.v("Main activity is disconnected from MusicService");
+        Timber.v("MusicServiceHelper is disconnected from MusicService");
+        mService = null;
+        mBound = false;
+        _instance = null;
     }
 
 
     // ---------------- MusicServiceHendler.ReadyEvent
     public class ReadyEvent {
         public ReadyEvent() {}
-    }
-
-    // ---------------- MusicServiceHendler.OnReadyListener
-    @Deprecated
-    public interface OnReadyListener {
-        public void onReady();
     }
 
 }

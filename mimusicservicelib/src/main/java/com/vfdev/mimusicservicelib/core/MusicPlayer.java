@@ -180,6 +180,16 @@ public class MusicPlayer implements
         // Prepare player : get track's info: title, duration, stream_url,  waveform_url
         Timber.v("playNextTrack");
 
+        // This fixes the problem if user first starts the playback
+        // using this method
+        if (mState == State.Stopped) {
+            // Only when Player is stopped, request audio focus
+            if (!requestAudioFocus()) {
+                Timber.v("Failed to get audio focus");
+                return false;
+            }
+        }
+
         // this should solve the problem of multiple 'machine gun' touches problem
 //        if (mState == State.Preparing)
 //            return true;
@@ -191,10 +201,10 @@ public class MusicPlayer implements
         }
 
         // get track index randomly :
-        debugShowTracks();
+//        debugShowTracks();
         int index = new Random().nextInt(mTracks.size());
         TrackInfo track = mTracks.remove(index);
-        debugShowTracks();
+//        debugShowTracks();
         mTracksHistory.add(track);
 
         if (mTracksHistory.size() > TRACKSHISTORY_LIMIT) {
@@ -212,6 +222,16 @@ public class MusicPlayer implements
         // this should solve the problem of multiple 'machine gun' touches problem
 ////        if (mState == State.Preparing)
 ////            return true;
+
+        // This fixes the problem if user first starts the playback
+        // using this method
+        if (mState == State.Stopped) {
+            // Only when Player is stopped, request audio focus
+            if (!requestAudioFocus()) {
+                Timber.v("Failed to get audio focus");
+                return false;
+            }
+        }
 
         if (mTracksHistory.size() > 1) {
 
@@ -279,11 +299,6 @@ public class MusicPlayer implements
         // debug : get tags:
         Timber.v("Track title : "+ track.title);
         Timber.v("Track tags : "+ track.tags);
-
-        // get waveform:
-//        String waveform_url=track.waveformUrl;
-//        mCurrentWaveform=null;
-//        ImageLoader.getInstance().loadImage(waveform_url, mLoadingListener);
 
         return true;
     }

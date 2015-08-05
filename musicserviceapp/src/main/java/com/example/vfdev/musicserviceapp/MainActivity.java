@@ -40,8 +40,7 @@ TODO :
     7)
 */
 
-public class MainActivity extends Activity implements
-        MusicServiceHelper.OnReadyListener
+public class MainActivity extends Activity
 {
 
     private MusicServiceHelper mMSHelper;
@@ -70,8 +69,8 @@ public class MainActivity extends Activity implements
         queryET = (EditText) findViewById(R.id.query);
         artworkIV = (ImageView) findViewById(R.id.artwork);
 
-        mMSHelper = new MusicServiceHelper(this, new SoundCloundProvider(), MainActivity.class);
-        mMSHelper.startMusicService(this);
+        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
+        mMSHelper.startMusicService();
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
@@ -161,8 +160,7 @@ public class MainActivity extends Activity implements
 
     // --------- MusicServiceHelper.OnReadyListener
 
-    @Override
-    public void onReady() {
+    public void onEvent(MusicServiceHelper.ReadyEvent event) {
         TrackInfo t = mMSHelper.getPlayingTrackInfo();
         if (t != null) {
             restoreUi(t, mMSHelper.isPlaying());
