@@ -16,6 +16,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.vfdev.mimusicservicelib.MusicService;
 import com.vfdev.mimusicservicelib.MusicServiceHelper;
+import com.vfdev.mimusicservicelib.MusicServiceHelper;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
