@@ -12,11 +12,32 @@ v0.2
 	        - Music Player :
 	            - Tests :
                     - Unit :
-                        a) getDuration function (unit tests)
+                        OK = a) getDuration function (unit tests)
                         b)
                     - Functional :
                         a) All class methods in different states
 
-	- Add HearThisProvider as TrackInfoProvider
 
+	- Bugs :
+		- Fix random selection on the query
+			- when tags are updated -> show the most pertinent results 
+			= Problem : how to setup query that satisfies the conditions : 
+				1) get the most pertinent tracks 
+				2) get random tracks at EACH query (especially, when app is started it shouldn't play the same tracks as at previous launches)
+			OK == S1 : TrackInfoProvider should have two request modes
+ 				- when query tags are updated 
+					-> mode 2 = request should not be randomized: http://api.soundcloud.com/tracks.json?q=tags
+				- when provider is requested internally (as during continuous playing option) ->
+					-> mode 1 = request should be randomized: http://api.soundcloud.com/tracks.json?q=tags&offset=random_offset
+				<=> Test :
+					a) App started -> get tags from 'sharedPreferences' -> mode 1
+					b) App is playing and need to get more tracks -> mode 1 
+					c) User has updated the tags -> mode 2
+					
+	OK = Add to trackInfo a description field					
+	OK = Add HearThisProvider as TrackInfoProvider (https://hearthis.at/api-v2/)
+		- http://api-v2.hearthis.at/search?t=armin%20van%20buuren
+		- Refactor TrackInfoProvider <- RestApiJsonProvider <- {SoundCloundProvider, HearThisProvider}
+
+	
  

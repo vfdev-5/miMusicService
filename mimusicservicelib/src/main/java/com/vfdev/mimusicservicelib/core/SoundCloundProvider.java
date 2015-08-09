@@ -100,46 +100,12 @@ import timber.log.Timber;
  */
 
 
-public class SoundCloundProvider extends TrackInfoProvider {
+public class SoundCloundProvider extends RestApiJsonProvider {
 
-
-    // Connection
-    private OkHttpClient mClient = new OkHttpClient();
-    private String CLIENT_ID="1abbcf4f4c91b04bb5591fe5a9f60821";
-
-    private final static int HTTP_OK=200;
-    private final static String API_URL="http://api.soundcloud.com/";
-    private final static String REQUEST_TRACKS_URL_WITH_QUERY=API_URL+"tracks.json?q=";
-    private final static String REQUEST_A_TRACK_URL=API_URL+"tracks/";
-    private final static int TRACKS_LIMIT=7;
-
-    /**
-     * Abstract method to retrieve track info
-     * @param count is the number of tracks to retrieve
-     * @return array of track infos
-     */
-    public Result retrieve(int count) {
-        return retrieve(count, true);
-    }
-
-    public Result retrieve(int count, boolean useOffset) {
-        Timber.v("SoundCloundProvider : request tracks on the query : " + mQuery + ", useOffset=" + useOffset);
-        String requestUrl = setupRequest(count, useOffset);
-        Pair<Integer, String> result = sendRequest(requestUrl);
-        int code = result.first;
-        if (code == OK) {
-            Result anotherResult = parseResponse(result.second);
-            if (anotherResult.code == OK) {
-                return new Result(code, anotherResult.tracks);
-            } else if (anotherResult.code == NOTRACKS_ERR && useOffset) {
-                // Handle if no result with non-zero offset
-                return retrieve(count, false);
-            }
-            return new Result(anotherResult.code, null);
-        }
-        // handle errors:
-        return new Result(code,  null);
-    }
+    // Configuration
+    protected final static String API_URL="http://api.soundcloud.com/";
+    protected final static String REQUEST_TRACKS_URL_WITH_QUERY = API_URL + "tracks.json?q=";
+    protected final static String CLIENT_ID="1abbcf4f4c91b04bb5591fe5a9f60821";
 
     // -------- Protected methods
 
@@ -148,74 +114,30 @@ public class SoundCloundProvider extends TrackInfoProvider {
         requestUrl += mQuery;
         requestUrl += "&limit=" + String.valueOf(count);
         if (useOffset) {
-            requestUrl += "&offset=" + String.valueOf(new Random().nextInt(1000));
+            requestUrl += "&offset=" + String.valueOf(new Random().nextInt(50));
         }
-        requestUrl += "&order=created_at";
         requestUrl += "&client_id=" + CLIENT_ID;
+        Timber.i("Request URL : " + requestUrl);
         return requestUrl;
     }
 
-
-    protected Pair<Integer,String> sendRequest(String requestUrl) {
-        try {
-            Request request = new Request.Builder().url(requestUrl).build();
-            Response response = mClient.newCall(request).execute();
-            int code = response.code();
-            String responseStr = response.body().string();
-            if (code == HTTP_OK) {
-                return new Pair<>(OK, responseStr);
-            } else {
-                Timber.e("getResponse : Request error : " + responseStr);
-                return new Pair<>(APP_ERR, responseStr);
+    protected TrackInfo parseTrackInfoJSON(JSONObject trackJSON) throws JSONException {
+        if (trackJSON.getBoolean("streamable")) {
+            TrackInfo tInfo = new TrackInfo();
+            tInfo.id = trackJSON.getString("id");
+            tInfo.title = trackJSON.getString("title");
+            tInfo.duration = trackJSON.getInt("duration");
+            tInfo.tags = trackJSON.getString("tag_list");
+            tInfo.description = trackJSON.getString("description");
+            tInfo.streamUrl = trackJSON.getString("stream_url") + "?client_id=" + CLIENT_ID;
+            Iterator<String> keys = trackJSON.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                tInfo.fullInfo.put(key, trackJSON.getString(key));
             }
-        } catch (IOException e) {
-            Timber.i(e, "getTracksInBackground : SoundCloud get request error : " + e.getMessage());
-            return new Pair<>(CONNECTION_ERR, null);
+            return tInfo;
         }
-    }
-
-    protected Result parseResponse(String responseStr) {
-        int length = 0;
-        JSONArray tracksJSON = null;
-        try {
-            // Parse the response:
-            tracksJSON = new JSONArray(responseStr);
-            length = tracksJSON.length();
-
-            if (length == 0) {
-                return new Result(NOTRACKS_ERR, null);
-            }
-
-            ArrayList<TrackInfo> tracks = new ArrayList<>();
-            for (int i=0;i<length;i++) {
-                JSONObject trackJSON = tracksJSON.getJSONObject(i);
-                if (trackJSON.getBoolean("streamable")) {
-                    TrackInfo tInfo = new TrackInfo();
-                    tInfo.id = trackJSON.getString("id");
-                    tInfo.title = trackJSON.getString("title");
-                    tInfo.duration = trackJSON.getInt("duration");
-                    tInfo.tags = trackJSON.getString("tag_list");
-                    tInfo.streamUrl = trackJSON.getString("stream_url") + "?client_id=" + CLIENT_ID;
-
-                    Iterator<String> keys = trackJSON.keys();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        tInfo.fullInfo.put(key, trackJSON.getString(key));
-                    }
-                    tracks.add(tInfo);
-                }
-            }
-            if (!tracks.isEmpty()) {
-                Timber.v("getTracksInBackground : found " + tracks.size() + " tracks");
-                return new Result(OK, tracks);
-            }
-            else {
-                return new Result(NOTRACKS_ERR, null);
-            }
-        } catch (JSONException e) {
-            Timber.e(e, "getTracksInBackground : JSON parse error : " + e.getMessage());
-            return new Result(APP_ERR, null);
-        }
+        return null;
     }
 
 }

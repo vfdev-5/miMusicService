@@ -31,6 +31,7 @@ public abstract class TrackInfoProvider {
 
     protected OnDownloadTrackInfoListener mTrackInfoListener;
     protected String mQuery = "Trance";
+    protected boolean mRandomize = false;
 
     // Async task
     private DownloadTrackInfoAsyncTask mDownloader;
@@ -65,6 +66,7 @@ public abstract class TrackInfoProvider {
             }
             mQuery = "";
         }
+        mRandomize = false;
     }
 
 

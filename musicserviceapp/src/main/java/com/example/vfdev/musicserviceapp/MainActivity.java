@@ -17,6 +17,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.vfdev.mimusicservicelib.MusicService;
 import com.vfdev.mimusicservicelib.MusicServiceHelper;
 import com.vfdev.mimusicservicelib.MusicServiceHelper;
+import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
@@ -70,7 +71,8 @@ public class MainActivity extends Activity
         queryET = (EditText) findViewById(R.id.query);
         artworkIV = (ImageView) findViewById(R.id.artwork);
 
-        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
+//        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
+        mMSHelper = MusicServiceHelper.getInstance().init(this, new HearThisAtProvider(), MainActivity.class);
         mMSHelper.startMusicService();
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();

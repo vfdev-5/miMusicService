@@ -11,8 +11,9 @@ public class TrackInfo implements Serializable {
 
     public String id;
     public String title;
-    public int duration = -1;
+    public int duration = -1; // in milliseconds
     public String tags;
+    public String description;
     public String streamUrl;
 
     public boolean equals(Object t) {
@@ -20,6 +21,11 @@ public class TrackInfo implements Serializable {
             return this.id.compareTo(((TrackInfo) t).id) == 0;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return id + ", " + title;
     }
 
     public HashMap<String, String> fullInfo = new HashMap<>();
@@ -30,6 +36,7 @@ public class TrackInfo implements Serializable {
         out.writeUTF(title);
         out.writeInt(duration);
         out.writeUTF(tags);
+        out.writeUTF(description);
         out.writeUTF(streamUrl);
         out.writeObject(fullInfo);
         out.flush();
@@ -41,6 +48,7 @@ public class TrackInfo implements Serializable {
         title = in.readUTF();
         duration = in.readInt();
         tags = in.readUTF();
+        description = in.readUTF();
         streamUrl = in.readUTF();
         fullInfo = (HashMap<String, String>) in.readObject();
     }
