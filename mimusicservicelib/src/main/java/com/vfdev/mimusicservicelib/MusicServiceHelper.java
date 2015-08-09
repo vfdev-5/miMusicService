@@ -1,6 +1,5 @@
 package com.vfdev.mimusicservicelib;
 
-import android.app.usage.UsageEvents;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

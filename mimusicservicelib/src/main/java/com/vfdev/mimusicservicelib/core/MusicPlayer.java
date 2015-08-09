@@ -61,6 +61,7 @@ public class MusicPlayer implements
     // -------- Public methods
 
     public MusicPlayer(Context context) {
+
         mMediaPlayer = new MediaPlayer();
 
         // Make sure the media player will acquire a wake-lock while playing. If we don't do
@@ -164,15 +165,26 @@ public class MusicPlayer implements
     }
 
     public int getTrackDuration() {
-        return mMediaPlayer.getDuration();
+        if (mState == State.Playing ||
+                mState == State.Paused) {
+            return mMediaPlayer.getDuration();
+        }
+        return 0;
     }
 
     public int getTrackCurrentPosition() {
-        return mMediaPlayer.getCurrentPosition();
+        if (mState == State.Playing ||
+                mState == State.Paused) {
+            return mMediaPlayer.getCurrentPosition();
+        }
+        return 0;
     }
 
     public void rewindTrackTo(int seconds) {
-        mMediaPlayer.seekTo(seconds);
+        if (mState == State.Playing ||
+                mState == State.Paused) {
+            mMediaPlayer.seekTo(seconds);
+        }
     }
 
     public boolean playNextTrack() {
@@ -364,7 +376,7 @@ public class MusicPlayer implements
 
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Timber.i("what=" + String.valueOf(what) + ", extra=" + String.valueOf(extra));
-        mState = State.Stopped;
+        toStoppedState();
         return true; // true indicates we handled the error
     }
 

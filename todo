@@ -1,0 +1,22 @@
+miMusicService library 
+
+Versions and TODOs :
+
+v0.1
+	...
+
+
+v0.2
+	- Add tests (within example android application)
+	    - Core :
+	        - Music Player :
+	            - Tests :
+                    - Unit :
+                        a) getDuration function (unit tests)
+                        b)
+                    - Functional :
+                        a) All class methods in different states
+
+	- Add HearThisProvider as TrackInfoProvider
+
+ 

@@ -18,10 +18,6 @@ import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
 import java.util.ArrayList;
 
-//import com.nostra13.universalimageloader.core.ImageLoader;
-//import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-//import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
-
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 

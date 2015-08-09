@@ -1,13 +1,11 @@
 package com.vfdev.mimusicservicelib.core;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-//import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * Created by vfomin on 5/16/15.

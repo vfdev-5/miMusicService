@@ -1,4 +1,4 @@
-package com.example.vfdev.mimusicservicelib;
+package com.example.vfdev.musicapp;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
