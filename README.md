@@ -1,7 +1,7 @@
 # miMusicService
 a library with a media player and a service used to listen streaming music from cloud resources :
 
-- [SoundCloud](www.soundcloud.com)
+- [SoundCloud](https://soundcloud.com)
 - [HearThis.at](https://hearthis.at)
 
 ## Simple usage :
