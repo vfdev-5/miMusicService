@@ -8,13 +8,13 @@
 
 ## Cloud resources :
 
-    - SoundCloud : www.soundcloud.com
+    - <a href="www.soundcloud.com">SoundCloud</a>
+    - <a href="https://hearthis.at/">HearThis.at</a>
     
 ## Simple usage :
 
     1) MainActivity implements MusicServiceHelper.OnReadyListener and override onReady method 
-    2) declare MusicServiceHelper with SoundCloundProvider        
-    3) In onDestroy  method release MusicServiceHelper
+    2) declare MusicServiceHelper with a track info provider : SoundCloundProvider or HearThisAtProvider or both          3) In onDestroy  method release MusicServiceHelper
     4) Use methods of the MusicServiceHelper : 
         - play 
         - pause 
@@ -40,6 +40,10 @@ public class MainActivity extends Activity implements MusicServiceHelper.OnReady
     protected void onCreate(Bundle savedInstanceState) {
         // ...
         mMSHelper = new MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
+        // Or for multiple providers :
+        // mMSHelper = new MusicServiceHelper.getInstance().init(this, 
+        //                      new TrackInfoProvider{ new SoundCloundProvider(), new HearThisAtProvider() },
+        //                      MainActivity.class);
         mMSHelper.startMusicService();
         
     }
