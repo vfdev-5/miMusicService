@@ -7,9 +7,8 @@
     - MusicServiceHelper 
 
 ## Cloud resources :
-
-    - <a href="www.soundcloud.com">SoundCloud</a>
-    - <a href="https://hearthis.at/">HearThis.at</a>
+    - [SoundCloud](www.soundcloud.com)
+    - [HearThis.at](https://hearthis.at)
     
 ## Simple usage :
 
