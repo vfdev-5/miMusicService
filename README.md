@@ -66,5 +66,5 @@ public class MainActivity extends Activity
     
 ## See examples for more details :
 
-- [musicplayerapp](https://github.com/vfdev-5/miMusicService/blob/master/musicapp)
-- [musicserviceapp](https://github.com/vfdev-5/miMusicService/blob/master/musicserviceapp)
+- [musicplayerapp](https://github.com/vfdev-5/miMusicService/blob/master/musicapp), a single activity application with an instance of [MusicPlayer](https://github.com/vfdev-5/miMusicService/blob/master/mimusicservicelib/src/main/java/com/vfdev/mimusicservicelib/core/MusicPlayer.java)
+- [musicserviceapp](https://github.com/vfdev-5/miMusicService/blob/master/musicserviceapp), a single activity application which uses [MusicServiceHelper](https://github.com/vfdev-5/miMusicService/blob/master/mimusicservicelib/src/main/java/com/vfdev/mimusicservicelib/MusicServiceHelper.java) to start a [MusicService](https://github.com/vfdev-5/miMusicService/blob/master/mimusicservicelib/src/main/java/com/vfdev/mimusicservicelib/MusicService.java) that plays music.
