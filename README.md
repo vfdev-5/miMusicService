@@ -66,5 +66,5 @@ public class MainActivity extends Activity
     
 ## See examples for more details :
 
-- [musicserviceapp](https://github.com/vfdev-5/miMusicService/blob/master/musicapp)
-- [musicplayerapp](https://github.com/vfdev-5/miMusicService/blob/master/musicserviceapp)
+- [musicplayerapp](https://github.com/vfdev-5/miMusicService/blob/master/musicapp)
+- [musicserviceapp](https://github.com/vfdev-5/miMusicService/blob/master/musicserviceapp)
