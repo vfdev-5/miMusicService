@@ -1,4 +1,4 @@
-# miMusicService
+# miMusicService [![Build Status](https://travis-ci.org/vfdev-5/miMusicService.svg?branch=master)](https://travis-ci.org/vfdev-5/miMusicService)
 a library with a media player and a service used to listen streaming music from cloud resources :
 
 - [SoundCloud](https://soundcloud.com)
