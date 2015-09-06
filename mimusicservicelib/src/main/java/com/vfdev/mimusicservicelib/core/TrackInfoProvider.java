@@ -37,7 +37,7 @@ public abstract class TrackInfoProvider {
     private DownloadTrackInfoAsyncTask mDownloader;
 
 
-    // ---------- Abstract methods
+    // ---------- Public methods
 
     /**
      * Method to retrieve track info asynchronously
@@ -69,11 +69,11 @@ public abstract class TrackInfoProvider {
         mRandomize = false;
     }
 
-
-    // ---------- Public methods
     public void setOnDownloadTrackInfoListener(OnDownloadTrackInfoListener listener) {
         mTrackInfoListener = listener;
     }
+
+    public abstract String getName();
 
     // ---------- OnDownloadTrackInfoListener
     public interface OnDownloadTrackInfoListener {

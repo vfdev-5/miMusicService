@@ -107,6 +107,13 @@ public class SoundCloundProvider extends RestApiJsonProvider {
     protected final static String REQUEST_TRACKS_URL_WITH_QUERY = API_URL + "tracks.json?q=";
     protected final static String CLIENT_ID="1abbcf4f4c91b04bb5591fe5a9f60821";
 
+    // -------- Public methods
+
+    @Override
+    public String getName() {
+        return "SoundClound";
+    }
+
     // -------- Protected methods
 
     protected String setupRequest(int count, boolean useOffset) {

@@ -21,6 +21,9 @@ import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
+import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
+
+import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
@@ -72,20 +75,18 @@ public class MainActivity extends Activity
         artworkIV = (ImageView) findViewById(R.id.artwork);
 
 //        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
-        mMSHelper = MusicServiceHelper.getInstance().init(this, new HearThisAtProvider(), MainActivity.class);
+//        mMSHelper = MusicServiceHelper.getInstance().init(this, new HearThisAtProvider(), MainActivity.class);
+        mMSHelper = MusicServiceHelper.getInstance().init(
+                this,
+                new TrackInfoProvider[] {new SoundCloundProvider(), new HearThisAtProvider()},
+                MainActivity.class
+        );
         mMSHelper.startMusicService();
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
 
     }
-
-//    @Override
-//    public void onWindowFocusChanged(boolean hasFocus) {
-//        if (hasFocus) {
-//
-//        }
-//    }
 
 
     @Override

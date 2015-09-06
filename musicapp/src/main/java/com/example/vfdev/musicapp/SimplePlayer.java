@@ -1,24 +1,19 @@
-package com.example.vfdev.myapplication;
+package com.example.vfdev.musicapp;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.squareup.okhttp.Response;
-import com.vfdev.mimusicservicelib.MusicServiceHelper;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 

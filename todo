@@ -39,5 +39,10 @@ v0.2
 		- http://api-v2.hearthis.at/search?t=armin%20van%20buuren
 		- Refactor TrackInfoProvider <- RestApiJsonProvider <- {SoundCloundProvider, HearThisProvider}
 
+	OK = Handle multiple TrackInfoProviders
+		- Can add/remove providers
+		
+	- How about caching music during app run
+		- https://github.com/master255/ImmortalPlayer
 	
  

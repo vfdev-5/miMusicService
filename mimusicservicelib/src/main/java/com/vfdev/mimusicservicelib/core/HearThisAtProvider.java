@@ -56,6 +56,14 @@ public class HearThisAtProvider extends RestApiJsonProvider {
     protected final static String API_URL="http://api-v2.hearthis.at/";
     protected final static String REQUEST_TRACKS_URL_WITH_QUERY = API_URL + "search?t=";
 
+    // -------- Public methods
+
+    @Override
+    public String getName() {
+        return "HearThis.At";
+    }
+
+
     // -------- Protected methods
 
     protected String setupRequest(int count, boolean useOffset) {

@@ -11,6 +11,7 @@ import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
@@ -29,7 +30,9 @@ public class MusicServiceHelper implements
 {
     private Context mContext;
     private Class<?> mActivityClass;
-    private TrackInfoProvider mProvider;
+//    private TrackInfoProvider mProvider;
+    private List<TrackInfoProvider> mProviders;
+
     private MusicService mService = null;
     private boolean mBound = false;
 //    private OnReadyListener mListener = null;
@@ -52,13 +55,19 @@ public class MusicServiceHelper implements
     }
 
     private MusicServiceHelper() {
-
     }
 
     public MusicServiceHelper init(Context context, TrackInfoProvider provider, Class<?> activityClass) {
+        return init(context, new TrackInfoProvider[] {provider}, activityClass);
+    }
+
+    public MusicServiceHelper init(Context context, TrackInfoProvider[] providers, Class<?> activityClass) {
         mContext = context;
         mActivityClass = activityClass;
-        mProvider = provider;
+        mProviders = new ArrayList<>();
+        for (TrackInfoProvider provider : providers) {
+            mProviders.add(provider);
+        }
         return this;
     }
 
@@ -76,15 +85,16 @@ public class MusicServiceHelper implements
 
     public void stopMusicService() {
         Timber.v("stopMusicService");
-        if (!isInit()) return;
+//        if (!isInit()) return;
+        if (mContext == null) return;
         unbind();
         mContext.stopService(new Intent(mContext, MusicService.class));
     }
 
     public void release() {
-        if (!isInit()) return;
+//        if (!isInit()) return;
+        if (mContext == null) return;
         unbind();
-
     }
 
     public MusicPlayer getPlayer() {
@@ -158,6 +168,25 @@ public class MusicServiceHelper implements
         }
     }
 
+    public boolean addTrackInfoProvider(TrackInfoProvider provider) {
+        if (mBound) {
+            mService.addTrackInfoProvider(provider);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeTrackInfoProvider(int index) {
+        return mBound && mService.removeTrackInfoProvider(index);
+    }
+
+    public List<String> getTrackInfoProviderNames() {
+        if (mBound) {
+            return mService.getTrackInfoProviderNames();
+        }
+        return null;
+    }
+
     // ----------- Protected methods
 
     protected void unbind() {
@@ -170,7 +199,7 @@ public class MusicServiceHelper implements
 
     protected boolean isInit() {
         boolean res = (mContext !=null) &&
-                (mProvider != null) &&
+                (mProviders != null) &&
                 (mActivityClass != null);
         if (!res) {
             Timber.e("MusicServiceHelper is not initialized");
@@ -191,9 +220,13 @@ public class MusicServiceHelper implements
         mBound = true;
 
         // setup once track info provider:
-        if (mService.getTrackInfoProvider() == null) {
-            mService.setTrackInfoProvider(mProvider);
+        if (mService.getTrackInfoProviderNames().isEmpty()) {
+            for (TrackInfoProvider provider : mProviders) {
+                mService.addTrackInfoProvider(provider);
+            }
+//            mService.setTrackInfoProvider(mProviders);
             mService.setContinuousPlay(true);
+            mProviders = null;
         }
 
         EventBus.getDefault().post(new ReadyEvent());

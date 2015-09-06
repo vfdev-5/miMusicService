@@ -17,6 +17,7 @@ import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
@@ -42,7 +43,8 @@ public class MusicService extends Service implements
     boolean mContinuousPlay = false;
 
     // Connection
-    private TrackInfoProvider mTrackInfoProvider;
+//    private TrackInfoProvider mTrackInfoProvider;
+    private List<TrackInfoProvider> mTrackInfoProviders;
     private static final int TRACKS_COUNT=5;
 
 
@@ -163,22 +165,63 @@ public class MusicService extends Service implements
         mContinuousPlay = value;
     }
 
-    public TrackInfoProvider getTrackInfoProvider() {
-        return mTrackInfoProvider;
+    public List<String> getTrackInfoProviderNames() {
+        List<String> names = new ArrayList<>();
+        if (!checkProvidersExist()) return names;
+
+        for (TrackInfoProvider provider : mTrackInfoProviders) {
+            names.add(provider.getName());
+        }
+        return names;
     }
 
-    public void setTrackInfoProvider(TrackInfoProvider provider) {
-        mTrackInfoProvider = provider;
-        mTrackInfoProvider.setOnDownloadTrackInfoListener(this);
-        // NO NEED
-        // Get some tracks
-        //  mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
+    public synchronized void addTrackInfoProvider(TrackInfoProvider provider) {
+        if (mTrackInfoProviders == null) {
+            mTrackInfoProviders = new ArrayList<>();
+        }
+        mTrackInfoProviders.add(provider);
+        provider.setOnDownloadTrackInfoListener(this);
     }
+
+    public synchronized boolean removeTrackInfoProvider(int index) {
+        if (!checkProvidersExist()) return false;
+        if (index >= 0 && index < mTrackInfoProviders.size()) {
+            mTrackInfoProviders.remove(index);
+            return true;
+        }
+        return false;
+    }
+
+    @Deprecated
+    public void setTrackInfoProvider(TrackInfoProvider provider) {
+        if (mTrackInfoProviders == null) {
+            mTrackInfoProviders = new ArrayList<>();
+        }
+        mTrackInfoProviders.add(0, provider);
+        provider.setOnDownloadTrackInfoListener(this);
+    }
+
+
 
     public void setupTracks(String query) {
-        if (mTrackInfoProvider != null) {
-            mTrackInfoProvider.setQuery(query);
-            mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
+        if (!checkProvidersExist()) return;
+        retrieveTracks(query);
+    }
+
+    // ------- Private methods
+
+    private boolean checkProvidersExist() {
+        if (mTrackInfoProviders == null) {
+            Timber.w("TrackInfoProviders are not yet initialized");
+            return false;
+        }
+        return true;
+    }
+
+    private void retrieveTracks(String query) {
+        for (TrackInfoProvider provider : mTrackInfoProviders) {
+            if (query != null) provider.setQuery(query);
+            provider.retrieveInBackground(TRACKS_COUNT);
         }
     }
 
@@ -225,11 +268,10 @@ public class MusicService extends Service implements
     public void onEvent(MusicPlayer.StateEvent event) {
         if (event.state == MusicPlayer.State.Preparing) {
             showNotification(event.trackInfo.title);
-
-            if (mTrackInfoProvider != null &&
+            if (checkProvidersExist()  &&
                     mContinuousPlay &&
                     mPlayer.getTracks().size() < 2) {
-                mTrackInfoProvider.retrieveInBackground(TRACKS_COUNT);
+                retrieveTracks(null); // without query
             }
         }
     }

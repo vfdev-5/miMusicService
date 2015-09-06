@@ -213,7 +213,7 @@ public class MusicPlayer implements
         }
 
         // get track index randomly :
-//        debugShowTracks();
+        debugShowTracks();
         int index = new Random().nextInt(mTracks.size());
         TrackInfo track = mTracks.remove(index);
 //        debugShowTracks();
@@ -288,8 +288,10 @@ public class MusicPlayer implements
     }
 
     private void changeState(State state, TrackInfo trackInfo) {
-        mState = state;
-        EventBus.getDefault().post(new StateEvent(mState, trackInfo));
+        if (mState != state) {
+            mState = state;
+            EventBus.getDefault().post(new StateEvent(mState, trackInfo));
+        }
     }
 
     private boolean prepareAndPlay(TrackInfo track) {
