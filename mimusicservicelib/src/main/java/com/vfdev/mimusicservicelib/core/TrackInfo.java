@@ -17,10 +17,7 @@ public class TrackInfo implements Serializable {
     public String streamUrl;
 
     public boolean equals(Object t) {
-        if (t instanceof TrackInfo) {
-            return this.id.compareTo(((TrackInfo) t).id) == 0;
-        }
-        return false;
+        return (t instanceof TrackInfo) && (this.id.compareTo(((TrackInfo) t).id) == 0);
     }
 
     @Override
