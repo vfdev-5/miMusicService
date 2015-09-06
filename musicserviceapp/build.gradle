@@ -1,20 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        release {
-            def propsFile = rootProject.file('keystore.properties')
-            if (propsFile.exists()) {
-                def props = new Properties()
-                props.load(new FileInputStream(propsFile))
-                storeFile = file(props['storeFile'])
-                storePassword = props['storePassword']
-                keyAlias = props['keyAlias']
-                keyPassword = props['keyPassword']
-            }
-        }
-    }
-
+//    signingConfigs {
+//        release {
+//            def propsFile = rootProject.file('keystore.properties')
+//            if (propsFile.exists()) {
+//                def props = new Properties()
+//                props.load(new FileInputStream(propsFile))
+//                storeFile = file(props['storeFile'])
+//                storePassword = props['storePassword']
+//                keyAlias = props['keyAlias']
+//                keyPassword = props['keyPassword']
+//            }
+//        }
+//    }
 
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
@@ -25,7 +24,7 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
-        signingConfig signingConfigs.release
+//        signingConfig signingConfigs.release
     }
     buildTypes {
         release {
