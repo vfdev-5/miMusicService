@@ -1,3 +1,4 @@
+# Taken from http://stackoverflow.com/questions/31264136/travis-ci-android-tests-no-connected-devices
 language: android
 cache:
   directories:
@@ -47,4 +48,4 @@ before_script:
 
 script:
   - android list target
-  - ./gradlew connectedAndroidTest
+  - ./gradlew connectedAndroidTest -PdisablePreDex
