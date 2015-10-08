@@ -9,7 +9,7 @@ Scenario: Test all public methods when one track is added
     Given 1 good track info added
     When network is enabled
     Then test play method when given 1 tracks
-    Then data is loaded and player is playing
+#    Then data is loaded and player is playing
 
 #Scenario: Test all public methods when one track is added
 #    Given a MusicPlayer instance

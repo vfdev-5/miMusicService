@@ -133,11 +133,11 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
 
     }
 
-    @Then("^data is loaded and player is playing")
-    public void then_data_is_loaded_and_player_is_playing() {
+//    @Then("^data is loaded and player is playing")
+//    public void then_data_is_loaded_and_player_is_playing() {
 //        assertTrue(isLoadingAndPlaying);
 //        assertTrue(mPlayerState == MusicPlayer.State.Playing);
-    }
+//    }
 
 
 //    @Then("^test all public methods")

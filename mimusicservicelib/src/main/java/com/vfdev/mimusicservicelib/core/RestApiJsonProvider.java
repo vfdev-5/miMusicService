@@ -105,6 +105,11 @@ public abstract class RestApiJsonProvider extends TrackInfoProvider {
     protected Result parseResponse(String responseStr) {
         int length = 0;
         JSONArray tracksJSON = null;
+        // responseStr can have 'null' (from HearThisAtProvider)
+        if (responseStr.equalsIgnoreCase("null")){
+            return new Result(NOTRACKS_ERR, null);
+        }
+
         try {
             // Parse the response:
             tracksJSON = new JSONArray(responseStr);

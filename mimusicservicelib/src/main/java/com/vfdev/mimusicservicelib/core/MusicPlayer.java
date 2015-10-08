@@ -373,6 +373,7 @@ public class MusicPlayer implements
             changeState(State.Playing, null);
             player.start();
         } else {
+            EventBus.getDefault().post(new ErrorEvent(ERROR_NO_AUDIOFOCUS, "Audio focus request is not granted"));
             Timber.v("Has no audio focus. Do not start");
         }
     }
