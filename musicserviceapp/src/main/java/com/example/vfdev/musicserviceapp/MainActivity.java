@@ -19,6 +19,7 @@ import com.vfdev.mimusicservicelib.MusicServiceHelper;
 import com.vfdev.mimusicservicelib.MusicServiceHelper;
 import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
+import com.vfdev.mimusicservicelib.core.ProviderQuery;
 import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
@@ -55,6 +56,8 @@ public class MainActivity extends Activity
     TextView durationTV;
     EditText queryET;
     ImageView artworkIV;
+    EditText minDurationET;
+    EditText maxDurationET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,8 @@ public class MainActivity extends Activity
         durationTV = (TextView) findViewById(R.id.duration);
         queryET = (EditText) findViewById(R.id.query);
         artworkIV = (ImageView) findViewById(R.id.artwork);
+        minDurationET = (EditText) findViewById(R.id.minDuration);
+        maxDurationET = (EditText) findViewById(R.id.maxDuration);
 
 //        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
 //        mMSHelper = MusicServiceHelper.getInstance().init(this, new HearThisAtProvider(), MainActivity.class);
@@ -148,7 +153,28 @@ public class MainActivity extends Activity
 
     public void onSendQuery(View view) {
         mMSHelper.clearPlaylist();
-        mMSHelper.setupTracks(queryET.getText().toString());
+
+        ProviderQuery params = new ProviderQuery();
+        if (!minDurationET.getText().toString().isEmpty()) {
+            try {
+                params.durationMin = Integer.parseInt(minDurationET.getText().toString())*1000;
+            } catch (NumberFormatException e) {
+                params.durationMin = -1;
+            }
+
+        }
+        if (!maxDurationET.getText().toString().isEmpty()) {
+            try {
+                params.durationMax = Integer.parseInt(maxDurationET.getText().toString())*1000;
+            } catch (NumberFormatException e) {
+                params.durationMax = -1;
+            }
+        }
+        params.text = queryET.getText().toString();
+        mMSHelper.setupTracks(params);
+
+
+
     }
 
 

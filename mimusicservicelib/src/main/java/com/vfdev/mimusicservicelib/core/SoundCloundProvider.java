@@ -118,11 +118,18 @@ public class SoundCloundProvider extends RestApiJsonProvider {
 
     protected String setupRequest(int count, boolean useOffset) {
         String requestUrl = REQUEST_TRACKS_URL_WITH_QUERY;
-        requestUrl += mQuery;
+        requestUrl += mQuery.text;
         requestUrl += "&limit=" + String.valueOf(count);
         if (useOffset) {
             requestUrl += "&offset=" + String.valueOf(new Random().nextInt(50));
         }
+        if (mQuery.durationMin > 0) {
+            requestUrl += "&duration[from]=" + String.valueOf(mQuery.durationMin);
+        }
+        if (mQuery.durationMax > 0) {
+            requestUrl += "&duration[to]=" + String.valueOf(mQuery.durationMax);
+        }
+
         requestUrl += "&client_id=" + CLIENT_ID;
         Timber.i("Request URL : " + requestUrl);
         return requestUrl;

@@ -43,6 +43,7 @@ public class MusicPlayer implements
     public static final int ERROR_DATASOURCE = 1;
     public static final int ERROR_APP = 2;
     public static final int ERROR_NO_AUDIOFOCUS = 3;
+    public static final int ERROR_MP_ERROR = 3;
 
     // Player states
     public enum State {
@@ -378,6 +379,7 @@ public class MusicPlayer implements
 
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Timber.i("what=" + String.valueOf(what) + ", extra=" + String.valueOf(extra));
+        //EventBus.getDefault().post(new ErrorEvent(ERROR_MP_ERROR, "MediaPlayer error : " + "what=" + String.valueOf(what) + ", extra=" + String.valueOf(extra)));
         toStoppedState();
         return true; // true indicates we handled the error
     }

@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
+import com.vfdev.mimusicservicelib.core.ProviderQuery;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
@@ -124,6 +125,13 @@ public class MusicServiceHelper implements
             mService.setupTracks(query);
         }
     }
+
+    public void setupTracks(ProviderQuery query) {
+        if (mBound) {
+            mService.setupTracks(query);
+        }
+    }
+
 
     public ArrayList<TrackInfo> getPlaylist() {
         if (mBound) {

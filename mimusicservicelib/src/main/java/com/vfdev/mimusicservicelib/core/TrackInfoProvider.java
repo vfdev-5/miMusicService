@@ -30,8 +30,8 @@ public abstract class TrackInfoProvider {
     public final static int QUERY_ERR=4;
 
     protected OnDownloadTrackInfoListener mTrackInfoListener;
-    protected String mQuery = "Trance";
     protected boolean mRandomize = false;
+    protected ProviderQuery mQuery = new ProviderQuery();
 
     // Async task
     private DownloadTrackInfoAsyncTask mDownloader;
@@ -57,17 +57,16 @@ public abstract class TrackInfoProvider {
      */
     public abstract Result retrieve(int count);
 
-    public synchronized void setQuery(String query) {
-        try {
-            mQuery = URLEncoder.encode(query, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            if (mTrackInfoListener != null) {
-                mTrackInfoListener.onDownloadTrackInfo(new Result(QUERY_ERR, null));
-            }
-            mQuery = "";
-        }
+    public synchronized void setQuery(String text) {
+        mQuery.text = encodeUrl(text);
         mRandomize = false;
     }
+
+    public synchronized void setQuery(ProviderQuery query) {
+        mQuery = query;
+        setQuery(query.text);
+    }
+
 
     public void setOnDownloadTrackInfoListener(OnDownloadTrackInfoListener listener) {
         mTrackInfoListener = listener;
@@ -75,10 +74,25 @@ public abstract class TrackInfoProvider {
 
     public abstract String getName();
 
+    // ---------- protected/private methods
+
+    private String encodeUrl(String text) {
+        try {
+            return URLEncoder.encode(text, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            if (mTrackInfoListener != null) {
+                mTrackInfoListener.onDownloadTrackInfo(new Result(QUERY_ERR, null));
+            }
+            return "";
+        }
+    }
+
+
     // ---------- OnDownloadTrackInfoListener
     public interface OnDownloadTrackInfoListener {
         public void onDownloadTrackInfo(Result result);
     }
+
 
     // ------------ DownloadTrackInfoAsyncTask
     private class DownloadTrackInfoAsyncTask extends AsyncTask<Integer, Void, Result> {
@@ -89,7 +103,7 @@ public abstract class TrackInfoProvider {
         }
         @Override
         protected Result doInBackground(Integer... params) {
-            if (!mQuery.isEmpty()) {
+            if (!mQuery.text.isEmpty()) {
                 return TrackInfoProvider.this.retrieve(params[0]);
             } else {
                 return new Result(QUERY_ERR, null);

@@ -1,18 +1,20 @@
 package com.example.vfdev.musicapp.test.core;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.android.support.test.deps.guava.eventbus.EventBus;
 import com.example.vfdev.musicapp.SimplePlayer;
 import com.example.vfdev.musicapp.test.Commons;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 
-import org.junit.experimental.theories.Theory;
-
-import java.util.ArrayList;
-import java.util.EventListener;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import cucumber.api.CucumberOptions;
 import cucumber.api.java.After;
@@ -33,7 +35,10 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
     private MusicPlayer mPlayer;
     private MusicPlayer.State mPlayerState = MusicPlayer.State.Stopped;
     private int playlistSize = 0;
+    private boolean isLoadingAndPlaying = false;
+    private CountDownLatch signal;
 
+    private MediaPlayer.OnBufferingUpdateListener onBufferingUpdateListener;
 
     public MusicPlayerTestSteps() {
         super(SimplePlayer.class);
@@ -47,6 +52,12 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
         assertTrue(context != null);
         mPlayer = new MusicPlayer(context);
         de.greenrobot.event.EventBus.getDefault().register(this);
+        onBufferingUpdateListener = new MediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                MusicPlayerTestSteps.this.onBufferingUpdate(mp, percent);
+            }
+        };
     }
 
     @After
@@ -88,21 +99,46 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
 
             assertTrue(size + 1 == playlistSize);
             assertTrue(mPlayerState == MusicPlayer.State.Preparing);
-
-//            if (tracksCount-1 > 0) {
-//                assertTrue(mPlayer.playNextTrack());
-//            } else {
-//                assertFalse(mPlayer.playNextTrack());
-//                assertTrue(mPlayerState == MusicPlayer.State.Preparing);
-//            }
-
-
         }
 
+    }
 
 
+    @Then("^test play method when given (\\d+) tracks")
+    public void then_test_play_method(final int tracksCount) throws Throwable {
+        assertTrue(tracksCount == mPlayer.getTracksCount());
+        mPlayer.pause();
+
+        if (tracksCount == 0){
+            assertFalse(mPlayer.play());
+            assertTrue(mPlayerState == MusicPlayer.State.Stopped);
+        } else {
+
+            // THIS DOES NOT WORK
+            // PROBLEM IS :
+            // DO NOT KNOW HOW TO LAUNCH EVENT LOOP IN MAIN THREAD
+            // DISPATCHING COMING EVENTS
+
+//            signal = new CountDownLatch(3);
+
+            int size = mPlayer.getTracksHistory().size();
+            assertTrue(mPlayer.play());
+            assertTrue(size + 1 == playlistSize);
+            assertTrue(mPlayerState == MusicPlayer.State.Preparing);
+
+//            signal.await(10, TimeUnit.SECONDS);
+//            assertTrue(isLoadingAndPlaying);
+//            assertTrue(mPlayerState == MusicPlayer.State.Playing);
+        }
 
     }
+
+    @Then("^data is loaded and player is playing")
+    public void then_data_is_loaded_and_player_is_playing() {
+//        assertTrue(isLoadingAndPlaying);
+//        assertTrue(mPlayerState == MusicPlayer.State.Playing);
+    }
+
 
 //    @Then("^test all public methods")
 //    public void then_test_all_public_methods() {
@@ -110,8 +146,36 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
 
     @When("^no network")
     public void when_no_network() {
-
+        enableNetwork(false);
     }
+
+    @When("^network is enabled")
+    public void when_network_is_enabled() {
+        enableNetwork(true);
+        try {
+            Field f = mPlayer.getClass().getDeclaredField("mMediaPlayer");
+            f.setAccessible(true);
+            MediaPlayer player = (MediaPlayer) f.get(mPlayer);
+            player.setOnBufferingUpdateListener(onBufferingUpdateListener);
+        } catch (Exception e) {
+            // Failed to get MediaPlayer
+            assertTrue(false);
+        }
+    }
+
+    private void enableNetwork(boolean enable) {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        try {
+            Method m = cm.getClass().getDeclaredMethod("setMobileDataEnabled", boolean.class);
+            m.invoke(cm, enable);
+        } catch (Exception e) {
+            // Failed to disable network
+            assertTrue(false);
+        }
+        WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(enable);
+    }
+
 
     private void checkInitialState(int nbOfTracks) {
         assertTrue(mPlayer.getPlayingTrack() == null);
@@ -125,8 +189,22 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
     }
 
 
+    private void onBufferingUpdate(MediaPlayer mp, int percent) {
+        isLoadingAndPlaying = percent > 0;
+        if (signal != null) {
+            signal.countDown();
+        }
+    }
+
     public void onEvent(MusicPlayer.StateEvent event) {
         mPlayerState = event.state;
+        if (signal != null) {
+            signal.countDown();
+        }
+    }
+
+    public void enEvent(MusicPlayer.ErrorEvent event) {
+
     }
 
     public void onEvent(MusicPlayer.UpdateEvent event) {

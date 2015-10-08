@@ -68,10 +68,16 @@ public class HearThisAtProvider extends RestApiJsonProvider {
 
     protected String setupRequest(int count, boolean useOffset) {
         String requestUrl = REQUEST_TRACKS_URL_WITH_QUERY;
-        requestUrl += mQuery;
+        requestUrl += mQuery.text;
         if (useOffset) {
             requestUrl += "&page=" + String.valueOf(new Random().nextInt(50));
         }
+//        if (mQuery.durationMin > 0) {
+//            requestUrl += "&duration=" + String.valueOf(mQuery.durationMin/1000);
+//        }
+//        if (mQuery.durationMax > 0) {
+//            requestUrl += "&duration=" + String.valueOf(mQuery.durationMax/1000);
+//        }
         Timber.i("Request URL : " + requestUrl);
         return requestUrl;
     }
@@ -90,6 +96,17 @@ public class HearThisAtProvider extends RestApiJsonProvider {
                 String key = keys.next();
                 tInfo.fullInfo.put(key, trackJSON.getString(key));
             }
+
+            // apply query parameters:
+            if (mQuery.durationMin > 0 &&
+                    tInfo.duration < mQuery.durationMin) {
+                return null;
+            }
+            if (mQuery.durationMax > 0 &&
+                    tInfo.duration > mQuery.durationMax) {
+                return null;
+            }
+
             return tInfo;
         }
         return null;

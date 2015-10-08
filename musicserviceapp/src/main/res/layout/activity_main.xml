@@ -109,5 +109,32 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberSigned"
+        android:ems="10"
+        android:id="@+id/maxDuration"
+        android:layout_below="@+id/duration"
+        android:layout_alignRight="@+id/artwork"
+        android:layout_alignEnd="@+id/artwork"
+        android:layout_marginTop="51dp"
+        android:layout_toRightOf="@+id/play"
+        android:layout_toEndOf="@+id/play"
+        android:hint="max duration" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberSigned"
+        android:ems="10"
+        android:id="@+id/minDuration"
+        android:layout_alignTop="@+id/maxDuration"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/play"
+        android:layout_toStartOf="@+id/play"
+        android:hint="min duration " />
+
 
 </RelativeLayout>

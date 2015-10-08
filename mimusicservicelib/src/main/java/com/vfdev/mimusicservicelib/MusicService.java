@@ -13,6 +13,7 @@ import android.os.IBinder;
 
 import com.example.vfdev.mimusicservicelib.R;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
+import com.vfdev.mimusicservicelib.core.ProviderQuery;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
@@ -201,12 +202,17 @@ public class MusicService extends Service implements
         provider.setOnDownloadTrackInfoListener(this);
     }
 
-
-
     public void setupTracks(String query) {
         if (!checkProvidersExist()) return;
         retrieveTracks(query);
     }
+
+    public void setupTracks(ProviderQuery query) {
+        if (!checkProvidersExist()) return;
+        retrieveTracks(query);
+    }
+
+
 
     // ------- Private methods
 
@@ -219,6 +225,13 @@ public class MusicService extends Service implements
     }
 
     private void retrieveTracks(String query) {
+        for (TrackInfoProvider provider : mTrackInfoProviders) {
+            if (query != null && !query.isEmpty()) provider.setQuery(query);
+            provider.retrieveInBackground(TRACKS_COUNT);
+        }
+    }
+
+    private void retrieveTracks(ProviderQuery query) {
         for (TrackInfoProvider provider : mTrackInfoProviders) {
             if (query != null) provider.setQuery(query);
             provider.retrieveInBackground(TRACKS_COUNT);
@@ -271,7 +284,7 @@ public class MusicService extends Service implements
             if (checkProvidersExist()  &&
                     mContinuousPlay &&
                     mPlayer.getTracks().size() < 2) {
-                retrieveTracks(null); // without query
+                retrieveTracks(""); // without query
             }
         }
     }
