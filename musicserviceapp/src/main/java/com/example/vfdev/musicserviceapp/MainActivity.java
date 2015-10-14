@@ -1,7 +1,6 @@
 package com.example.vfdev.musicserviceapp;
 
 import android.app.Activity;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,15 +15,10 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.vfdev.mimusicservicelib.MusicService;
 import com.vfdev.mimusicservicelib.MusicServiceHelper;
-import com.vfdev.mimusicservicelib.MusicServiceHelper;
-import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.ProviderQuery;
-import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
-
-import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 import timber.log.Timber;
@@ -81,11 +75,17 @@ public class MainActivity extends Activity
 
 //        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
 //        mMSHelper = MusicServiceHelper.getInstance().init(this, new HearThisAtProvider(), MainActivity.class);
-        mMSHelper = MusicServiceHelper.getInstance().init(
-                this,
-                new TrackInfoProvider[] {new SoundCloundProvider(), new HearThisAtProvider()},
-                MainActivity.class
-        );
+//        mMSHelper = MusicServiceHelper.getInstance().init(
+//                this,
+//                new TrackInfoProvider[] {new SoundCloundProvider(), new HearThisAtProvider()},
+//                MainActivity.class
+//        );
+        String[] providerList = new String[] { "SoundCloud", "HearThisAt"};
+        TrackInfoProvider[] providers = new TrackInfoProvider[providerList.length];
+        for (int i=0;i<providerList.length;i++) {
+            providers[i] = MusicServiceHelper.createProvider(providerList[i]);
+        }
+        mMSHelper = MusicServiceHelper.getInstance().init(this, providers, MainActivity.class);
         mMSHelper.startMusicService();
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();

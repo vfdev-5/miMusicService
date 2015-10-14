@@ -100,7 +100,7 @@ import timber.log.Timber;
  */
 
 
-public class SoundCloundProvider extends RestApiJsonProvider {
+public class SoundCloudProvider extends RestApiJsonProvider {
 
     // Configuration
     protected final static String API_URL="http://api.soundcloud.com/";

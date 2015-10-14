@@ -11,7 +11,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
-import com.vfdev.mimusicservicelib.core.SoundCloundProvider;
+import com.vfdev.mimusicservicelib.core.SoundCloudProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
@@ -112,7 +112,7 @@ public class SimplePlayer extends Activity implements
     TextView tagsTV;
     TextView durationTV;
     EditText queryET;
-    SoundCloundProvider mProvider;
+    SoundCloudProvider mProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +128,7 @@ public class SimplePlayer extends Activity implements
 
         mPlayer = new MusicPlayer(this);
 
-        mProvider = new SoundCloundProvider();
+        mProvider = new SoundCloudProvider();
         mProvider.setOnDownloadTrackInfoListener(this);
 
         setupTracks("Trance Armin Van Buuren");

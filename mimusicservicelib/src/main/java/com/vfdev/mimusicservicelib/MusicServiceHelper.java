@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.ProviderQuery;
+import com.vfdev.mimusicservicelib.core.SoundCloudProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
@@ -31,8 +33,7 @@ public class MusicServiceHelper implements
 {
     private Context mContext;
     private Class<?> mActivityClass;
-//    private TrackInfoProvider mProvider;
-    private List<TrackInfoProvider> mProviders;
+    private TrackInfoProvider[] mProviders;
 
     private MusicService mService = null;
     private boolean mBound = false;
@@ -65,10 +66,7 @@ public class MusicServiceHelper implements
     public MusicServiceHelper init(Context context, TrackInfoProvider[] providers, Class<?> activityClass) {
         mContext = context;
         mActivityClass = activityClass;
-        mProviders = new ArrayList<>();
-        for (TrackInfoProvider provider : providers) {
-            mProviders.add(provider);
-        }
+        mProviders = providers;
         return this;
     }
 
@@ -177,7 +175,7 @@ public class MusicServiceHelper implements
     }
 
     public boolean addTrackInfoProvider(TrackInfoProvider provider) {
-        if (mBound) {
+        if (mBound && provider != null) {
             mService.addTrackInfoProvider(provider);
             return true;
         }
@@ -191,6 +189,20 @@ public class MusicServiceHelper implements
     public List<String> getTrackInfoProviderNames() {
         if (mBound) {
             return mService.getTrackInfoProviderNames();
+        }
+        return null;
+    }
+
+    /**
+     * @param name, "SoundCloud", "HearThisAt"
+     * @return TrackInfoProvider instance, otherwise null if name is not recognized
+     */
+    public static TrackInfoProvider createProvider(String name) {
+        name += "Provider";
+        if (name.equalsIgnoreCase(SoundCloudProvider.class.getSimpleName())) {
+            return new SoundCloudProvider();
+        } else if (name.equalsIgnoreCase(HearThisAtProvider.class.getSimpleName())) {
+            return new HearThisAtProvider();
         }
         return null;
     }
@@ -232,7 +244,6 @@ public class MusicServiceHelper implements
             for (TrackInfoProvider provider : mProviders) {
                 mService.addTrackInfoProvider(provider);
             }
-//            mService.setTrackInfoProvider(mProviders);
             mService.setContinuousPlay(true);
             mProviders = null;
         }

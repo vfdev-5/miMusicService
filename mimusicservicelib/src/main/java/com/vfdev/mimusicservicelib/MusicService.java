@@ -177,6 +177,10 @@ public class MusicService extends Service implements
     }
 
     public synchronized void addTrackInfoProvider(TrackInfoProvider provider) {
+        if (provider == null) {
+            Timber.e("Try to add a null as provider");
+            return;
+        }
         if (mTrackInfoProviders == null) {
             mTrackInfoProviders = new ArrayList<>();
         }
@@ -195,6 +199,10 @@ public class MusicService extends Service implements
 
     @Deprecated
     public void setTrackInfoProvider(TrackInfoProvider provider) {
+        if (provider == null) {
+            Timber.e("Try to add a null as provider");
+            return;
+        }
         if (mTrackInfoProviders == null) {
             mTrackInfoProviders = new ArrayList<>();
         }
@@ -218,7 +226,7 @@ public class MusicService extends Service implements
 
     private boolean checkProvidersExist() {
         if (mTrackInfoProviders == null) {
-            Timber.w("TrackInfoProviders are not yet initialized");
+            Timber.e("TrackInfoProviders are not yet initialized");
             return false;
         }
         return true;
