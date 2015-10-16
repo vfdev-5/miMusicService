@@ -2,6 +2,7 @@ package com.vfdev.mimusicservicelib.core;
 
 import android.util.Pair;
 
+import com.example.vfdev.mimusicservicelib.R;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -102,16 +103,18 @@ import timber.log.Timber;
 
 public class SoundCloudProvider extends RestApiJsonProvider {
 
+    public static final String NAME = "SoundCloud";
+    public static final int DRAWABLE_ID = R.drawable.soundcloud;
+
     // Configuration
     protected final static String API_URL="http://api.soundcloud.com/";
     protected final static String REQUEST_TRACKS_URL_WITH_QUERY = API_URL + "tracks.json?q=";
     protected final static String CLIENT_ID="1abbcf4f4c91b04bb5591fe5a9f60821";
 
-    // -------- Public methods
+    // -------- Static meta-methods
 
-    @Override
     public String getName() {
-        return "SoundClound";
+        return NAME;
     }
 
     // -------- Protected methods
@@ -144,6 +147,11 @@ public class SoundCloudProvider extends RestApiJsonProvider {
             tInfo.tags = trackJSON.getString("tag_list");
             tInfo.description = trackJSON.getString("description");
             tInfo.streamUrl = trackJSON.getString("stream_url") + "?client_id=" + CLIENT_ID;
+
+            tInfo.artist = trackJSON.getJSONObject("user").getString("username");
+            tInfo.artworkUrl = trackJSON.getString("artwork_url");
+            tInfo.resourceUrl = trackJSON.getString("permalink_url");
+
             Iterator<String> keys = trackJSON.keys();
             while (keys.hasNext()) {
                 String key = keys.next();

@@ -37,7 +37,7 @@ v0.2
 	OK = Add to trackInfo a description field					
 	OK = Add HearThisProvider as TrackInfoProvider (https://hearthis.at/api-v2/)
 		- http://api-v2.hearthis.at/search?t=armin%20van%20buuren
-		- Refactor TrackInfoProvider <- RestApiJsonProvider <- {SoundCloundProvider, HearThisProvider}
+		- Refactor TrackInfoProvider <- RestApiJsonProvider <- {SoundCloudProvider, HearThisProvider}
 
 	OK = Handle multiple TrackInfoProviders
 		- Can add/remove providers

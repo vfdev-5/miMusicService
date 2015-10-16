@@ -13,5 +13,12 @@ public class ProviderQuery {
     public int durationMin = -1; // in msec
     public int durationMax = -1; // in msec
 
+    @Override
+    public String toString() {
+        return "{ text: " + text + ", " +
+                "durationMin: " + durationMin + ", " +
+                "durationMax: " + durationMax + "}";
+    }
+
 
 }

@@ -12,7 +12,6 @@ import java.util.ArrayList;
  */
 public abstract class TrackInfoProvider {
 
-
     public class Result {
         public int code = 0;
         public ArrayList<TrackInfo> tracks;

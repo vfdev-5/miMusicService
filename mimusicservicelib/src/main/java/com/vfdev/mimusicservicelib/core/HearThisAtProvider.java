@@ -1,5 +1,7 @@
 package com.vfdev.mimusicservicelib.core;
 
+import com.example.vfdev.mimusicservicelib.R;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -9,10 +11,7 @@ import java.util.Random;
 import timber.log.Timber;
 
 /**
- * Created by vfomin on 8/9/15.
- *
- *
- * Typical response :
+    Typical response :
      [
      {
          "id": "48250",
@@ -52,17 +51,18 @@ import timber.log.Timber;
  */
 public class HearThisAtProvider extends RestApiJsonProvider {
 
+    public static final String NAME = "HearThisAt";
+    public static final int DRAWABLE_ID = R.drawable.hearthisat;
+
     // Configuration
     protected final static String API_URL="http://api-v2.hearthis.at/";
     protected final static String REQUEST_TRACKS_URL_WITH_QUERY = API_URL + "search?t=";
 
     // -------- Public methods
 
-    @Override
     public String getName() {
-        return "HearThis.At";
+        return NAME;
     }
-
 
     // -------- Protected methods
 
@@ -72,12 +72,6 @@ public class HearThisAtProvider extends RestApiJsonProvider {
         if (useOffset) {
             requestUrl += "&page=" + String.valueOf(new Random().nextInt(50));
         }
-//        if (mQuery.durationMin > 0) {
-//            requestUrl += "&duration=" + String.valueOf(mQuery.durationMin/1000);
-//        }
-//        if (mQuery.durationMax > 0) {
-//            requestUrl += "&duration=" + String.valueOf(mQuery.durationMax/1000);
-//        }
         Timber.i("Request URL : " + requestUrl);
         return requestUrl;
     }
@@ -91,6 +85,12 @@ public class HearThisAtProvider extends RestApiJsonProvider {
             tInfo.duration = trackJSON.getInt("duration") * 1000;
             tInfo.tags = "";
             tInfo.streamUrl = streamUrl;
+            tInfo.description = "";
+
+            tInfo.artist = trackJSON.getJSONObject("user").getString("username");
+            tInfo.artworkUrl = trackJSON.getString("artwork_url");
+            tInfo.resourceUrl = trackJSON.getString("permalink_url");
+
             Iterator<String> keys = trackJSON.keys();
             while (keys.hasNext()) {
                 String key = keys.next();

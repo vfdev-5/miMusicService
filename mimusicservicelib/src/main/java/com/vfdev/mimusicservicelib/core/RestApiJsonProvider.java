@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import timber.log.Timber;
 
@@ -39,6 +40,11 @@ import timber.log.Timber;
  *     ...
  * }
  * ]
+ *
+ * or
+ * {"field1":{},
+ *  "field2:[<RESULT>],
+ * }
  *
  */
 public abstract class RestApiJsonProvider extends TrackInfoProvider {
@@ -103,42 +109,74 @@ public abstract class RestApiJsonProvider extends TrackInfoProvider {
     protected abstract TrackInfo parseTrackInfoJSON(JSONObject tracksJSON) throws JSONException;
 
     protected Result parseResponse(String responseStr) {
-        int length = 0;
-        JSONArray tracksJSON = null;
         // responseStr can have 'null' (from HearThisAtProvider)
         if (responseStr.equalsIgnoreCase("null")){
             return new Result(NOTRACKS_ERR, null);
         }
 
+        // check the structure : {"f1":{}, "f2":[]} or
+        JSONException exception;
         try {
-            // Parse the response:
-            tracksJSON = new JSONArray(responseStr);
-            length = tracksJSON.length();
-
-            if (length == 0) {
-                return new Result(NOTRACKS_ERR, null);
-            }
-
-            ArrayList<TrackInfo> tracks = new ArrayList<>();
-            for (int i=0;i<length;i++) {
-                JSONObject trackJSON = tracksJSON.getJSONObject(i);
-
-                TrackInfo tInfo = parseTrackInfoJSON(trackJSON);
-                if (tInfo != null) {
-                    tracks.add(tInfo);
-                }
-            }
-            if (!tracks.isEmpty()) {
-                Timber.v("getTracksInBackground : found " + tracks.size() + " tracks");
-                return new Result(OK, tracks);
-            }
-            else {
-                return new Result(NOTRACKS_ERR, null);
-            }
+            return parseFormatOne(responseStr);
         } catch (JSONException e) {
-            Timber.e(e, "getTracksInBackground : JSON parse error : " + e.getMessage() + ", responseStr : " + responseStr);
-            return new Result(APP_ERR, null);
+            exception = e;
         }
+
+        try {
+            return parseFormatTwo(responseStr);
+        } catch (JSONException e) {
+            exception = e;
+        }
+
+        // Last error :
+        Timber.e(exception, "getTracksInBackground : JSON parse error : " + exception.getMessage() + ", responseStr : " + responseStr);
+        return new Result(APP_ERR, null);
+    }
+
+
+    protected Result parseFormatOne(String responseStr) throws JSONException {
+        // Parse the response of format {"f1":{}, "f2":[]} :
+        JSONObject object = new JSONObject(responseStr);
+        Iterator<String> it = object.keys();
+        while (it.hasNext()) {
+            String key = it.next();
+            if (object.opt(key) instanceof JSONArray) {
+                return parseArray(object.getJSONArray(key));
+            }
+        }
+        throw new JSONException("No JSON arrays in the response");
+    }
+
+    protected Result parseFormatTwo(String responseStr) throws JSONException {
+        // Parse the response of format [{...}] :
+        JSONArray tracksJSON = new JSONArray(responseStr);
+        return parseArray(tracksJSON);
+    }
+
+    protected Result parseArray(JSONArray tracksJSON) throws JSONException {
+        int length = tracksJSON.length();
+
+        if (length == 0) {
+            return new Result(NOTRACKS_ERR, null);
+        }
+
+        ArrayList<TrackInfo> tracks = new ArrayList<>();
+        for (int i=0;i<length;i++) {
+            JSONObject trackJSON = tracksJSON.getJSONObject(i);
+
+            TrackInfo tInfo = parseTrackInfoJSON(trackJSON);
+            if (tInfo != null) {
+                tracks.add(tInfo);
+            }
+        }
+        if (!tracks.isEmpty()) {
+            Timber.v("getTracksInBackground : found " + tracks.size() + " tracks");
+            return new Result(OK, tracks);
+        }
+        else {
+            return new Result(NOTRACKS_ERR, null);
+        }
+
     }
 
 

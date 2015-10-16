@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Pair;
 
+import com.vfdev.mimusicservicelib.core.JamendoProvider;
+import com.vfdev.mimusicservicelib.core.SoundCloudProvider;
 import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 import com.vfdev.mimusicservicelib.core.ProviderQuery;
-import com.vfdev.mimusicservicelib.core.SoundCloudProvider;
 import com.vfdev.mimusicservicelib.core.TrackInfo;
 import com.vfdev.mimusicservicelib.core.TrackInfoProvider;
 
@@ -24,9 +26,6 @@ import timber.log.Timber;
  *
  * class MusicServiceHelper for easy usage of the MusicService
  *
- * class MusicServiceHendler.OnReadyListener
- * Listener used to respond when MusicServiceHelper is ready to be used
- *
  */
 public class MusicServiceHelper implements
         ServiceConnection
@@ -37,7 +36,6 @@ public class MusicServiceHelper implements
 
     private MusicService mService = null;
     private boolean mBound = false;
-//    private OnReadyListener mListener = null;
 
     // ------ Public methods
     /**
@@ -70,6 +68,8 @@ public class MusicServiceHelper implements
         return this;
     }
 
+    // ---------- MusicService methods
+
     public void startMusicService() {
         Timber.v("startMusicService");
         if (!isInit()) return;
@@ -84,17 +84,17 @@ public class MusicServiceHelper implements
 
     public void stopMusicService() {
         Timber.v("stopMusicService");
-//        if (!isInit()) return;
         if (mContext == null) return;
         unbind();
         mContext.stopService(new Intent(mContext, MusicService.class));
     }
 
     public void release() {
-//        if (!isInit()) return;
         if (mContext == null) return;
         unbind();
     }
+
+    // ------------ MusicPlayer methods
 
     public MusicPlayer getPlayer() {
         return mBound ? mService.getPlayer() : null;
@@ -174,10 +174,23 @@ public class MusicServiceHelper implements
         }
     }
 
+    // ---------- TrackInfoProvider methods
+
     public boolean addTrackInfoProvider(TrackInfoProvider provider) {
         if (mBound && provider != null) {
             mService.addTrackInfoProvider(provider);
             return true;
+        }
+        return false;
+    }
+
+    public boolean removeTrackInfoProvider(String name) {
+        if (mBound) {
+            List<String> list = mService.getTrackInfoProviderNames();
+            int index = list.indexOf(name);
+            if (index >= 0) {
+                return mService.removeTrackInfoProvider(index);
+            }
         }
         return false;
     }
@@ -195,7 +208,7 @@ public class MusicServiceHelper implements
 
     /**
      * @param name, "SoundCloud", "HearThisAt"
-     * @return TrackInfoProvider instance, otherwise null if name is not recognized
+     * @return TrackInfoProvider instance, otherwise null if the name is not recognized
      */
     public static TrackInfoProvider createProvider(String name) {
         name += "Provider";
@@ -203,9 +216,24 @@ public class MusicServiceHelper implements
             return new SoundCloudProvider();
         } else if (name.equalsIgnoreCase(HearThisAtProvider.class.getSimpleName())) {
             return new HearThisAtProvider();
+        } else if (name.equalsIgnoreCase(JamendoProvider.class.getSimpleName())) {
+            return new JamendoProvider();
         }
         return null;
     }
+
+    /**
+     * Method to get information about all possible TrackInfoProviders
+     * @return Array of pairs (trackinfoprovider's name, drawable id)
+     */
+    public static List<Pair<String, Integer>> allProvidersInfo() {
+        ArrayList<Pair<String, Integer>> output = new ArrayList<>();
+        output.add(new Pair<>(SoundCloudProvider.NAME, SoundCloudProvider.DRAWABLE_ID));
+        output.add(new Pair<>(HearThisAtProvider.NAME, HearThisAtProvider.DRAWABLE_ID));
+        output.add(new Pair<>(JamendoProvider.NAME, JamendoProvider.DRAWABLE_ID));
+        return output;
+    }
+
 
     // ----------- Protected methods
 
@@ -240,7 +268,7 @@ public class MusicServiceHelper implements
         mBound = true;
 
         // setup once track info provider:
-        if (mService.getTrackInfoProviderNames().isEmpty()) {
+        if (!mService.isInitialized()) {
             for (TrackInfoProvider provider : mProviders) {
                 mService.addTrackInfoProvider(provider);
             }

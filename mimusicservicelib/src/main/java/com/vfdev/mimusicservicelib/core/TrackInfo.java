@@ -11,10 +11,14 @@ public class TrackInfo implements Serializable {
 
     public String id;
     public String title;
+    public String artist;
     public int duration = -1; // in milliseconds
     public String tags;
     public String description;
     public String streamUrl;
+
+    public String artworkUrl; // URL to the image of the track
+    public String resourceUrl; // URL to the resource that provides the track to open with browser
 
     public boolean equals(Object t) {
         return (t instanceof TrackInfo) && (this.id.compareTo(((TrackInfo) t).id) == 0);

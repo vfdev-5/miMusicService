@@ -1,10 +1,13 @@
 package com.example.vfdev.musicserviceapp;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,6 +55,9 @@ public class MainActivity extends Activity
     ImageView artworkIV;
     EditText minDurationET;
     EditText maxDurationET;
+    CheckBox hearthisatCB;
+    CheckBox soundcloudCB;
+    CheckBox jamendoCB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,21 +78,29 @@ public class MainActivity extends Activity
         artworkIV = (ImageView) findViewById(R.id.artwork);
         minDurationET = (EditText) findViewById(R.id.minDuration);
         maxDurationET = (EditText) findViewById(R.id.maxDuration);
+        soundcloudCB = (CheckBox) findViewById(R.id.soundcloud);
+        hearthisatCB = (CheckBox) findViewById(R.id.hearthisat);
+        jamendoCB = (CheckBox) findViewById(R.id.jamendo);
 
-//        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloundProvider(), MainActivity.class);
+//        mMSHelper = MusicServiceHelper.getInstance().init(this, new SoundCloudProvider(), MainActivity.class);
 //        mMSHelper = MusicServiceHelper.getInstance().init(this, new HearThisAtProvider(), MainActivity.class);
 //        mMSHelper = MusicServiceHelper.getInstance().init(
 //                this,
-//                new TrackInfoProvider[] {new SoundCloundProvider(), new HearThisAtProvider()},
+//                new TrackInfoProvider[] {new SoundCloudProvider(), new HearThisAtProvider()},
 //                MainActivity.class
 //        );
-        String[] providerList = new String[] { "SoundCloud", "HearThisAt"};
+
+
+        String[] providerList = getProviders();
+
         TrackInfoProvider[] providers = new TrackInfoProvider[providerList.length];
         for (int i=0;i<providerList.length;i++) {
             providers[i] = MusicServiceHelper.createProvider(providerList[i]);
         }
         mMSHelper = MusicServiceHelper.getInstance().init(this, providers, MainActivity.class);
         mMSHelper.startMusicService();
+
+        setupCheckBoxes(providerList);
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
@@ -125,6 +139,40 @@ public class MainActivity extends Activity
     }
 
     // -------- Other class methods
+
+    public void onSoundCloudClicked(View view) {
+        if (soundcloudCB.isChecked()) {
+            mMSHelper.addTrackInfoProvider(MusicServiceHelper.createProvider("SoundCloud"));
+        } else {
+            mMSHelper.removeTrackInfoProvider("SoundCloud");
+        }
+        String msg = "Currently, there are/is " + mMSHelper.getTrackInfoProviderNames().size() + " provider(s)";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Log.d("MainActivity", "Providers : " + mMSHelper.getTrackInfoProviderNames());
+    }
+
+    public void onJamendoClicked(View view) {
+        if (jamendoCB.isChecked()) {
+            mMSHelper.addTrackInfoProvider(MusicServiceHelper.createProvider("Jamendo"));
+        } else {
+            mMSHelper.removeTrackInfoProvider("Jamendo");
+        }
+        String msg = "Currently, there are/is " + mMSHelper.getTrackInfoProviderNames().size() + " provider(s)";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Log.d("MainActivity", "Providers : " + mMSHelper.getTrackInfoProviderNames());
+    }
+
+
+    public void onHearThisAtClicked(View view) {
+        if (hearthisatCB.isChecked()) {
+            mMSHelper.addTrackInfoProvider(MusicServiceHelper.createProvider("HearThisAt"));
+        } else {
+            mMSHelper.removeTrackInfoProvider("HearThisAt");
+        }
+        String msg = "Currently, there are/is " + mMSHelper.getTrackInfoProviderNames().size() + " provider(s)";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Log.d("MainActivity", "Providers : " + mMSHelper.getTrackInfoProviderNames());
+    }
 
     public void onExitButtonClicked(View view) {
         mMSHelper.stopMusicService();
@@ -175,6 +223,28 @@ public class MainActivity extends Activity
 
 
 
+    }
+
+    protected String [] getProviders() {
+        SharedPreferences prefs = getSharedPreferences("MSA", 0);
+        String providers = prefs.getString("providers", "SoundCloud;HearThisAt");
+        return providers.split(";");
+    }
+
+    protected void setupCheckBoxes(String[] providers) {
+        soundcloudCB.setChecked(false);
+        hearthisatCB.setChecked(false);
+        jamendoCB.setChecked(false);
+        for (String provider : providers) {
+            if (provider.equalsIgnoreCase("SoundCloud")) {
+                soundcloudCB.setChecked(true);
+            } else if (provider.equalsIgnoreCase("HearThisAt")) {
+                hearthisatCB.setChecked(true);
+            } else if (provider.equalsIgnoreCase("Jamendo")) {
+                jamendoCB.setChecked(true);
+            }
+
+        }
     }
 
 

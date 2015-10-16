@@ -43,8 +43,7 @@ public class MusicService extends Service implements
     private MusicPlayer mPlayer;
     boolean mContinuousPlay = false;
 
-    // Connection
-//    private TrackInfoProvider mTrackInfoProvider;
+    // TrackInfo providers : if null -> service is not initialized
     private List<TrackInfoProvider> mTrackInfoProviders;
     private static final int TRACKS_COUNT=5;
 
@@ -164,6 +163,10 @@ public class MusicService extends Service implements
 
     public void setContinuousPlay(boolean value) {
         mContinuousPlay = value;
+    }
+
+    public boolean isInitialized() {
+        return mTrackInfoProviders != null;
     }
 
     public List<String> getTrackInfoProviderNames() {
