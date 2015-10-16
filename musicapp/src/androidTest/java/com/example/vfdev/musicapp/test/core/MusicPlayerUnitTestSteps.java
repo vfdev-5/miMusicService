@@ -1,10 +1,7 @@
 package com.example.vfdev.musicapp.test.core;
 
-import android.app.Instrumentation;
-import android.content.Context;
-import android.test.ActivityInstrumentationTestCase2;
+import android.test.AndroidTestCase;
 
-import com.example.vfdev.musicapp.SimplePlayer;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
 
 import cucumber.api.CucumberOptions;
@@ -19,20 +16,17 @@ import cucumber.api.java.en.Then;
         format = {"pretty","html:/data/data/com.example.vfdev.musicapp/html",
             "json:/data/data/com.example.vfdev.musicapp/jreport"},
         features = "features/core")
-public class MusicPlayerUnitTestSteps extends ActivityInstrumentationTestCase2<SimplePlayer> {
+public class MusicPlayerUnitTestSteps extends AndroidTestCase {
 
     private MusicPlayer mPlayer;
 
     public MusicPlayerUnitTestSteps() {
-        super(SimplePlayer.class);
+        super();
     }
 
     @Before
     public void before() {
-        assertNotNull(getActivity());
-        Context context = getActivity().getApplicationContext();
-        assertTrue(context != null);
-        mPlayer = new MusicPlayer(context);
+        mPlayer = new MusicPlayer(getContext());
     }
 
 

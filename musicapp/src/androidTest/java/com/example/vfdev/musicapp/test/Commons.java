@@ -7,7 +7,7 @@ import com.vfdev.mimusicservicelib.core.TrackInfo;
  */
 public class Commons {
 
-    public static TrackInfo getOneGoodTrackInfo() {
+    public static TrackInfo generateOneGoodTrackInfo() {
         TrackInfo trackInfo = new TrackInfo();
 
         trackInfo.id = "178781982";
@@ -19,7 +19,7 @@ public class Commons {
         return trackInfo;
     }
 
-    private static TrackInfo getOneBadTrackInfo() {
+    public static TrackInfo generateOneBadTrackInfo() {
         TrackInfo trackInfo = new TrackInfo();
 
         trackInfo.id = "178781982";
@@ -30,7 +30,6 @@ public class Commons {
 
         return trackInfo;
     }
-
 
 
 }

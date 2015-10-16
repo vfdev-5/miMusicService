@@ -72,7 +72,7 @@ public class MusicPlayerTestSteps extends ActivityInstrumentationTestCase2<Simpl
 
     @Given("^(\\d+) good track info added")
     public void given_a_good_track_info_added(final int tracksCount) {
-        TrackInfo goodTrack = Commons.getOneGoodTrackInfo();
+        TrackInfo goodTrack = Commons.generateOneGoodTrackInfo();
         for (int i=0;i<tracksCount;i++) {
             mPlayer.addTrack(goodTrack);
         }

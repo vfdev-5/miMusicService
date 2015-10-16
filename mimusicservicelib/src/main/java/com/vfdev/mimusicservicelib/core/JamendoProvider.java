@@ -101,13 +101,13 @@ public class JamendoProvider extends RestApiJsonProvider {
         if (mQuery.durationMin > 0 || mQuery.durationMax > 0) {
             requestUrl += "&durationbetween=";
             if (mQuery.durationMin > 0) {
-                requestUrl+=String.valueOf(mQuery.durationMin*1000);
+                requestUrl+=String.valueOf(mQuery.durationMin/1000);
             } else {
                 requestUrl+=String.valueOf(0);
             }
             requestUrl += "_";
             if (mQuery.durationMax > 0) {
-                requestUrl += String.valueOf(mQuery.durationMax*1000);
+                requestUrl += String.valueOf(mQuery.durationMax/1000);
             } else {
                 requestUrl += String.valueOf(1000000);
             }
