@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.util.Pair;
 
 import com.vfdev.mimusicservicelib.core.JamendoProvider;
+import com.vfdev.mimusicservicelib.core.ProviderMetaInfo;
 import com.vfdev.mimusicservicelib.core.SoundCloudProvider;
 import com.vfdev.mimusicservicelib.core.HearThisAtProvider;
 import com.vfdev.mimusicservicelib.core.MusicPlayer;
@@ -37,6 +38,22 @@ public class MusicServiceHelper implements
     private MusicService mService = null;
     private boolean mBound = false;
 
+    private static final ProviderMetaInfo[] availableProviders = new ProviderMetaInfo[] {
+        new ProviderMetaInfo(
+            SoundCloudProvider.NAME,
+            SoundCloudProvider.DRAWABLE_ID,
+            SoundCloudProvider.class),
+        new ProviderMetaInfo(
+            HearThisAtProvider.NAME,
+            HearThisAtProvider.DRAWABLE_ID,
+            HearThisAtProvider.class),
+        new ProviderMetaInfo(
+            JamendoProvider.NAME,
+            JamendoProvider.DRAWABLE_ID,
+            JamendoProvider.class)
+    };
+
+
     // ------ Public methods
     /**
      * Constructor
@@ -45,12 +62,9 @@ public class MusicServiceHelper implements
      * @param activityClass notification activity class that should be called
      *
      */
-    static private MusicServiceHelper _instance;
+    static private MusicServiceHelper _instance = new MusicServiceHelper();
 
     static public MusicServiceHelper getInstance() {
-        if (_instance == null) {
-            _instance = new MusicServiceHelper();
-        }
         return _instance;
     }
 
@@ -176,13 +190,25 @@ public class MusicServiceHelper implements
 
     // ---------- TrackInfoProvider methods
 
-    public boolean addTrackInfoProvider(TrackInfoProvider provider) {
+//    public boolean addTrackInfoProvider(TrackInfoProvider provider) {
+//        if (mBound && provider != null) {
+//            mService.addTrackInfoProvider(provider);
+//            return true;
+//        }
+//        return false;
+//    }
+
+    public boolean addTrackInfoProvider(String name) {
+
+        TrackInfoProvider provider = createProvider(name);
         if (mBound && provider != null) {
             mService.addTrackInfoProvider(provider);
             return true;
         }
         return false;
     }
+
+
 
     public boolean removeTrackInfoProvider(String name) {
         if (mBound) {
@@ -207,33 +233,35 @@ public class MusicServiceHelper implements
     }
 
     /**
-     * @param name, "SoundCloud", "HearThisAt"
+     * @param name, "SoundCloud", "HearThisAt", "Jamendo"
      * @return TrackInfoProvider instance, otherwise null if the name is not recognized
      */
     public static TrackInfoProvider createProvider(String name) {
-        name += "Provider";
-        if (name.equalsIgnoreCase(SoundCloudProvider.class.getSimpleName())) {
-            return new SoundCloudProvider();
-        } else if (name.equalsIgnoreCase(HearThisAtProvider.class.getSimpleName())) {
-            return new HearThisAtProvider();
-        } else if (name.equalsIgnoreCase(JamendoProvider.class.getSimpleName())) {
-            return new JamendoProvider();
+
+        try {
+            for (ProviderMetaInfo provider : availableProviders) {
+                if (name.equalsIgnoreCase(provider.name)) {
+                    return (TrackInfoProvider) provider.providerClass.newInstance();
+                }
+            }
+        } catch (InstantiationException e) {
+            Timber.e("InstantiationException. Create provider method failed to instantiate provider by name : " + name);
+            return null;
+        } catch (IllegalAccessException e) {
+            Timber.e("IllegalAccessException. Create provider method failed to instantiate provider by name : " + name);
+            return null;
         }
+        Timber.e("Create provider method failed to instantiate provider by name : " + name);
         return null;
     }
 
     /**
      * Method to get information about all possible TrackInfoProviders
-     * @return Array of pairs (trackinfoprovider's name, drawable id)
+     * @return List of ProviderMetaInfo
      */
-    public static List<Pair<String, Integer>> allProvidersInfo() {
-        ArrayList<Pair<String, Integer>> output = new ArrayList<>();
-        output.add(new Pair<>(SoundCloudProvider.NAME, SoundCloudProvider.DRAWABLE_ID));
-        output.add(new Pair<>(HearThisAtProvider.NAME, HearThisAtProvider.DRAWABLE_ID));
-        output.add(new Pair<>(JamendoProvider.NAME, JamendoProvider.DRAWABLE_ID));
-        return output;
+    public static ProviderMetaInfo[] availableProviders() {
+        return availableProviders;
     }
-
 
     // ----------- Protected methods
 
